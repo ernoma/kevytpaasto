@@ -1,0 +1,277 @@
+# 5:2-paastosovellus – toteutussuunnitelma
+
+Versio: 0.1  
+Päiväys: 18.10.2026  
+Tila: luonnos  
+Perustuu: [vaatimusmäärittely 0.2](../5-2-paasto-vaatimusmaarittely.md)
+
+Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tekniset päätökset ja jakaa toteutuksen vaiheisiin. Vaatimuksiin viitataan niiden tunnuksilla (esim. KIR-08). Merkintä **[tarkistettava]** tarkoittaa oletusta, joka varmistetaan ennen kyseisen osan toteutusta.
+
+## 1. Päätösten yhteenveto
+
+| Aihe | Päätös | Vaatimukset |
+| --- | --- | --- |
+| Sovellustyyppi | Natiivisovellus: React Native + Expo (managed workflow), TypeScript | ANS-03, HAK-01 |
+| Ensimmäinen alusta | Android. iOS myöhemmin samasta koodikannasta EAS Buildilla. | – |
+| Jakelu kehitysvaiheessa | Expo development build omaan puhelimeen; myöhemmin Google Play (sisäinen testaus → tuotanto) | – |
+| Paikallinen tietovarasto | SQLite (expo-sqlite) + Drizzle ORM, versioidut migraatiot | KIR-06, LAA-04 |
+| Fineli | Avoin aineisto muunnetaan rakennusvaiheessa SQLite-tietokannaksi, joka toimitetaan sovelluksen mukana | HAK-02, LAA-04 |
+| Open Food Facts -haku | Suorat kutsut OFF:n API:in sovelluksesta, paikallinen välimuisti | HAK-01, HAK-03 |
+| OFF-julkaisu | Paikallinen lähetysjono → kevyt välityspalvelu (serverless), joka käyttää sovelluksen OFF-tunnuksia | OFF-01…OFF-10 |
+| Käyttäjätilit | Ei käyttäjätilejä eikä pilvisynkronointia v1:ssä | KAY-02, TIE-02 |
+| Vienti ja palautus | JSON-tiedosto, skeemaversio, UUID-pohjainen yhdistäminen | HIS-03, kriteeri 11 |
+| Ansainta | Vain käyttöoikeusrajapinta (`entitlements`), ei maksutoimintoja v1:ssä | ANS-01…ANS-04 |
+| Testaus | Vitest ydinlogiikalle ja tietokantakerrokselle, Maestro keskeisille käyttöpoluille | Luku 9 |
+
+### 1.1 Hylätyt vaihtoehdot
+
+- **PWA / selainsovellus:** nopein aloittaa, mutta iOS voi tyhjentää selaimen tallennustilan (riski KIR-06:lle ja LAA-04:lle), viivakoodin luku vaihtelee selaimittain eikä sovelluskauppaostoja voi käyttää (ANS-03).
+- **Flutter:** teknisesti yhtä hyvä. TypeScript valittiin, jotta sovellus, välityspalvelu ja aineistoskriptit jakavat kielen ja tyypit.
+- **Pilvitietokanta (esim. Firebase, Supabase):** tarpeeton ilman tilejä ja synkronointia, ja toisi henkilötietojen käsittelyn palvelimelle.
+
+## 2. Arkkitehtuuri
+
+```
+┌──────────────────────── Puhelin (Expo-sovellus) ────────────────────────┐
+│                                                                          │
+│  UI (Expo Router -näkymät, komponentit)                                  │
+│        │                                                                 │
+│  Sovelluspalvelut (use-caset: kirjaa, siirrä, kopioi, vie, palauta…)     │
+│        │                    │                        │                   │
+│  Domain (puhdas TS:        Tietokantakerros        Integraatiot          │
+│  laskenta, validointi,     (Drizzle + SQLite)      - OFF-haku            │
+│  tilakoneet)               - käyttäjän tiedot       - Fineli (paikallinen)│
+│                            - fineli.db (vain luku)  - Julkaisujono        │
+└──────────────────────────────────────────────────────────┬───────────────┘
+                                                           │ HTTPS
+                     ┌─────────────────────────────────────┴─────┐
+                     │ Välityspalvelu (serverless)               │
+                     │ - OFF-tuotteen tarkistus + kirjoitus      │
+                     │ - kuvien lähetys                          │
+                     │ - nopeusrajoitus, ei henkilötietoja       │
+                     └─────────────────────┬─────────────────────┘
+                                           │
+                              Open Food Facts (API)
+```
+
+**Riippuvuussääntö:** `domain` ei tuo mitään muista kerroksista eikä React Nativesta. Tietokantakerros ja integraatiot tuovat vain domainin. UI kutsuu sovelluspalveluja eikä kirjoita SQL:ää suoraan.
+
+### 2.1 Hakemistorakenne
+
+```
+app/                    Expo-sovellus
+  app/                  Expo Router -reitit (näkymät)
+  src/
+    domain/             puhdas logiikka: energia, yksiköt, validointi, tilakoneet
+    db/                 Drizzle-skeema, migraatiot, repositoriot
+    services/           use-caset (kirjaus, suosikit, historia, vienti/palautus)
+    integrations/
+      off/              OFF-haku ja julkaisujonon asiakas
+      fineli/           paikallisen Fineli-tietokannan haku
+    entitlements/       käyttöoikeusrajapinta (v1: ei lisäominaisuuksia)
+    ui/                 jaetut komponentit, teema, tekstit (fi)
+  assets/fineli.db      rakennusvaiheessa tuotettu aineisto
+  tests/                Vitest-testit (domain, db, services)
+  e2e/                  Maestro-testit
+proxy/                  välityspalvelu (OFF-julkaisu)
+scripts/fineli/         Finelin avoimen aineiston muunnos SQLiteksi
+docs/                   suunnitelmat ja päätösmuistiot (docs/adr/)
+```
+
+Repositorio on yksi monorepo (npm workspaces). Jaettu tyyppimäärittely OFF-julkaisupyynnölle on `proxy`n ja `app`in yhteinen.
+
+## 3. Tietomalli
+
+Kaikki pääavaimet ovat sovelluksessa luotuja UUID-tunnisteita (KIR-07, HIS-03). Energia tallennetaan aina kcal-arvona liukulukuna pyöristämättä (LAS-01, LAS-03). Aikaleimat tallennetaan UTC ISO 8601 -muodossa, mutta **paastopäivän päivämäärä on paikallinen kalenteripäivä merkkijonona `YYYY-MM-DD`** (PAI-05).
+
+### 3.1 Taulut
+
+**settings** – yksi rivi
+- `default_limit_kcal` – uusien paastopäivien oletusraja (KAY-01, KAY-03)
+- `onboarding_done`, `schema_version`
+
+**fast_day**
+- `id`, `date` (UNIQUE, `YYYY-MM-DD`), `limit_kcal` (tilannekuva päivän luontihetkellä; muokattavissa erikseen, KAY-03, HIS-01), `created_at`
+- Paastopäivämerkinnän poisto poistaa myös kirjaukset vain erillisen vahvistuksen jälkeen (PAI-06).
+
+**food** – omat ja välimuistiin tallennetut tuotteet ja ruoat
+- `id`, `source` (`user` | `off` | `fineli`), `source_ref` (OFF-viivakoodi tai Fineli-ID), `barcode`
+- `name`, `brand`
+- `energy_kcal` (nullable – puuttuva ≠ 0, HAK-04), `energy_basis` (`per_100g` | `per_100ml` | `per_serving`)
+- `serving_amount`, `serving_unit` (`g` | `ml`), `serving_label` (esim. ”purkki, 200 g”, OMA-02)
+- `preparation_state` (raaka/kypsä/valmistettu/valmistamaton, nullable, LAS-06)
+- `is_favorite`, `deleted_at` (pehmeä poisto, jotta viittaukset säilyvät, OMA-06)
+- `user_override_json` – käyttäjän oma korjaus lähdetietoon (HAK-08); julkinen lähdetieto ei muutu
+- `fetched_at` – milloin ulkoinen tieto haettiin välimuistiin
+
+**meal** ja **meal_item** – suosikkiateriat (OMA-04, OMA-05)
+- `meal`: `id`, `name`, `is_favorite`, `deleted_at`
+- `meal_item`: `id`, `meal_id`, `food_id`, `amount`, `unit`
+- Aterian energia lasketaan aina osista; sitä ei tallenneta erikseen.
+
+**log_entry** – kirjaus on **tilannekuva** (KIR-08)
+- `id`, `fast_day_id`, `created_at`, `updated_at`
+- `name` (vapaaehtoinen pikakirjauksessa, KIR-02)
+- `amount`, `unit` (`g` | `ml` | `serving` | `kcal`)
+- `energy_kcal_per_basis`, `energy_basis` – kirjaushetken arvot
+- `kcal` – laskettu, pyöristämätön energia
+- `origin_type` (`quick` | `food` | `meal`), `origin_id` (vain alkuperätieto, ei laskennan lähde)
+- `meal_fraction` – osuus suosikkiateriasta (OMA-05)
+
+Aterian kirjaus tallennetaan yhtenä rivinä, jonka energia on laskettu osista kirjaushetkellä. Kopiointi toiseen päivään (HIS-02) luo uuden rivin uudella UUID:llä.
+
+**publish_job** – OFF-julkaisujono (OFF-07, OFF-08)
+- `id` (toimii myös idempotenssiavaimena välityspalvelulle), `food_id`, `barcode`
+- `state`: `draft` → `awaiting_consent` → `queued` → `sending` → `published` | `failed` | `exists_already`
+- `payload_json` – käyttäjän tarkistamat ja hyväksymät julkaistavat kentät
+- `image_paths_json`, `attempts`, `last_error`, `consented_at`, `updated_at`
+
+### 3.2 Fineli-tietokanta
+
+Erillinen, vain luettava `fineli.db`, joka liitetään yhteyteen (`ATTACH`). Sisältää ruoan tunnisteen, suomenkielisen nimen, energian (kcal/100 g, muunnettuna kJ-arvosta tarvittaessa), valmistustavan sekä FTS5-hakuindeksin. Kun Fineli-tuote kirjataan, sen tiedot kopioidaan `food`-tauluun (`source = fineli`), jolloin myöhemmät aineistopäivitykset eivät vaikuta vanhoihin kirjauksiin.
+
+## 4. Domain-logiikka
+
+Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
+
+- `kjToKcal(kj)` = kj / 4,184 (LAS-01)
+- `computeKcal({ amount, unit, energyKcal, basis, serving })` – erottaa per 100 g, per 100 ml ja per annos. Grammoja ja millilitroja ei muunneta toisikseen (LAS-02). Palauttaa virheen, jos energia puuttuu (HAK-04, LAS-07).
+- `parseAmount(text)` – hyväksyy desimaalipilkun ja -pisteen, hylkää negatiivisen ja tyhjän arvon (LAS-04, LAS-05)
+- `daySummary(entries, limit)` – summa pyöristämättömistä arvoista, jäljellä tai ylitys (PAI-02, PAI-03, LAS-03)
+- `formatKcal(value)` – pyöristys vain esitystä varten
+- `mealKcal(items, fraction)` – suosikkiaterian energia (OMA-04, OMA-05)
+- `publishJobTransition(state, event)` – julkaisujonon tilakone (OFF-07)
+- `validatePublishPayload(payload)` – julkaisun vähimmäistiedot (OFF-02, OFF-05)
+
+## 5. Ulkoiset tietolähteet
+
+### 5.1 Open Food Facts – haku
+
+- Viivakoodihaku: tuotteen haku viivakoodilla (API v2), pyydetään vain tarvittavat kentät (`fields=`).
+- Nimihaku: OFF:n hakurajapinta, suodatus maahan Suomi ensisijaisesti. Haku lähetetään vasta lyhyen viiveen jälkeen ja vähintään 3 merkillä, koska hakurajapinnan nopeusraja on tiukka **[tarkistettava: ajantasaiset rajat]**.
+- Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti.
+- Haetut tuotteet tallennetaan `food`-tauluun välimuistiksi, jolloin ne toimivat jatkossa ilman verkkoa (LAA-04).
+- Hakutuloksessa näytetään nimi, merkki, energia perusteineen ja lähde (HAK-03). Puuttuva energia merkitään selvästi (HAK-04).
+
+### 5.2 Fineli
+
+- Lähde: Finelin avoin data (lisenssi CC BY 4.0 **[tarkistettava]**).
+- `scripts/fineli/` lataa aineiston, muuntaa sen `fineli.db`:ksi ja tallentaa aineiston version. Skripti ajetaan käsin, kun Fineli julkaisee uuden version; tulos päivittyy käyttäjille sovelluspäivityksen mukana.
+- Lisenssimaininta näytetään sovelluksen Tietolähteet-näkymässä (TIE-03).
+
+### 5.3 Kesko
+
+Ei käytetä v1:ssä (HAK-09). Selvitys tehdään erillisenä tehtävänä; arkkitehtuuri sallii uuden `integrations/`-lähteen lisäämisen.
+
+## 6. OFF-julkaisu
+
+### 6.1 Kulku
+
+1. Käyttäjä lukee viivakoodin. Tuotetta ei löydy → siirrytään lisäyslomakkeeseen, viivakoodi säilyy (HAK-06).
+2. Tuote tallennetaan heti omaksi tuotteeksi ja on kirjattavissa (OFF-06).
+3. Käyttäjälle tarjotaan julkaisua. Näkymä kertoo, mitkä kentät ja kuvat julkaistaan avoimesti, ja käyttäjä tarkistaa ne (OFF-03, OFF-05). Ilman hyväksyntää työ jää tilaan `awaiting_consent`.
+4. Hyväksynnän jälkeen työ siirtyy jonoon. Lähetys tehdään, kun verkko on käytettävissä.
+5. Välityspalvelu tarkistaa vielä, onko tuote jo OFF:ssa (OFF-01). Jos on, palautetaan `exists_already` ja OFF:n tiedot näytetään käyttäjälle; uutta tuotetta ei luoda (OFF-08).
+6. Muussa tapauksessa välityspalvelu kirjoittaa tuotetiedot ja lähettää kuvat.
+
+### 6.2 Välityspalvelu
+
+- Ympäristö: Cloudflare Workers (tai vastaava serverless-palvelu). Tila: avain–arvo-varasto idempotenssiavaimille.
+- Säilyttää sovelluksen OFF-tunnukset salaisuuksina; tunnuksia ei ole sovelluspaketissa (OFF-09).
+- Idempotenssi: `publish_job.id` lähetetään jokaisessa yrityksessä; jo käsitelty avain palauttaa aiemman tuloksen (OFF-08).
+- Vastaanottaa vain julkaistavat tuotekentät ja kuvat. Ei vastaanota eikä tallenna päiväkirjaa, kalorirajaa tai laitetunnisteita (OFF-04, TIE-01).
+- Nopeusrajoitus asennuskohtaisen satunnaistunnisteen ja IP-osoitteen perusteella väärinkäytön estämiseksi.
+- Merkitsee muokkaukset sovelluksen nimellä ja versiolla OFF:n ohjeiden mukaisesti **[tarkistettava: suositellut parametrit sovellusten kautta tehdyille muokkauksille ja kuvien lisenssiehdot]**.
+- Kehitys ja testaus tehdään yksinomaan OFF:n testiympäristöä vastaan; tuotantoympäristöä käytetään vain hallitussa varmennuksessa (kriteeri 5).
+
+### 6.3 Lähteiden erottelu
+
+Julkaisulomakkeen kentät täytetään vain käyttäjän syöttämistä tai pakkauksesta tarkistamista tiedoista. Fineli- tai muista lähteistä kopioituja arvoja ei esitäytetä julkaistaviksi (OFF-10, TIE-04).
+
+## 7. Käyttöliittymä
+
+Suomenkielinen, puhelimelle suunniteltu. Tekstit kootaan yhteen tiedostoon (`src/ui/strings.fi.ts`), jotta myöhempi kielituki on mahdollinen.
+
+### 7.1 Näkymät
+
+| Näkymä | Sisältö | Vaatimukset |
+| --- | --- | --- |
+| Aloitus | Kalorirajan syöttö, ei muita kysymyksiä | KAY-01 |
+| Tänään | Paastopäivä: yhteenveto (raja, syöty, jäljellä/ylitys), suosikkipikanapit, kirjauslista. Ei-paastopäivä: ”Aloita paastopäivä” ja pääsy historiaan. | PAI-02…04, LAA-01, LAA-02 |
+| Lisää | Välilehdet tai osiot: Haku (OFF + Fineli + omat), Viivakoodi, Pikakirjaus (kcal), Suosikit | KIR-01, KIR-02 |
+| Määrä | Määrä g/ml/annos, laskettu kcal ennen tallennusta, lähde ja peruste näkyvissä | KIR-03, KIR-04, LAS-06 |
+| Kirjauksen muokkaus | Nimi, määrä, kcal, poisto, siirto toiseen päivään | KIR-05 |
+| Omat ruoat ja ateriat | Lista, lisäys, muokkaus, suosikkimerkintä, aterian kokoaminen | OMA-01…06 |
+| Uusi tuote | Viivakoodi, nimi, merkki, energia ja peruste, kuvat, julkaisun hyväksyntä | OFF-01…07 |
+| Historia | Kalenteri tai lista paastopäivistä, päivän avaus ja kopiointi | HIS-01, HIS-02 |
+| Asetukset | Oletusraja, vienti/palautus, tietojen poisto, julkaisujen tila, tietolähteet ja lisenssit | KAY-03, HIS-03, HIS-04, OFF-07, TIE-03 |
+
+### 7.2 Periaatteet
+
+- Suosikin oletusannos lisätään yhdellä napautuksella Tänään-näkymän pikanapista; kumoaminen tarjotaan lyhytaikaisella ilmoituksella (LAA-02).
+- Ylitys esitetään luvulla ja tekstillä (”Ylitys 45 kcal”), ei pelkällä värillä eikä moittivalla sävyllä (PAI-03, LAA-06, LAA-08).
+- Kaikilla toiminnoilla on saavutettavuusnimet, ja asettelu kestää järjestelmän tekstikoon suurennuksen (LAA-06).
+- Kameralupa pyydetään vasta, kun viivakoodinlukija avataan (KAY-04).
+- Tallennuspainike lukitaan tallennuksen ajaksi, ja kirjauksen UUID luodaan lomakkeen avautuessa, jotta kaksoisnapautus ei luo kahta riviä (KIR-07).
+
+Ennen vaihetta 1 tehdään kevyet rautalankaluonnokset Tänään- ja Lisää-näkymistä. Hienosäätö tehdään toimivassa sovelluksessa.
+
+## 8. Vienti, palautus ja tietojen poisto
+
+- Vientitiedosto: `kevytpaasto-vienti-YYYY-MM-DD.json`, sisältää `format`, `schemaVersion`, `exportedAt` sekä taulut `settings`, `fast_day`, `food` (vain `user`-lähteiset ja kirjauksiin/aterioihin liittyvät), `meal`, `meal_item`, `log_entry`. Julkaisujonoa ja kuvia ei viedä v1:ssä.
+- Tiedosto jaetaan järjestelmän jakovalikolla (expo-sharing) ja palautetaan tiedostonvalitsimella.
+- Palautus yhdistää UUID:n perusteella: olemassa oleva rivi jätetään ennalleen, uusi lisätään. Päivämäärätörmäys (sama `date`, eri UUID) yhdistää kirjaukset olemassa olevaan päivään ja säilyttää sen rajan. Ennen palautusta näytetään yhteenveto lisättävistä riveistä (kriteeri 11).
+- Tietojen poisto tyhjentää käyttäjän taulut ja kertoo, ettei jo OFF:iin julkaistu tieto poistu (HIS-04).
+
+## 9. Laatu ja testaus
+
+- **Yksikkötestit (Vitest):** koko `domain`-kerros. Hyväksymiskriteerit 2, 3 ja 10 kirjoitetaan testeiksi sellaisinaan.
+- **Tietokantatestit:** repositoriot ja palvelut ajetaan Node-ympäristön SQLitea vasten (better-sqlite3 samalla Drizzle-skeemalla). Kattaa vienti–palautus-kierroksen (kriteeri 11) ja migraatiot.
+- **Välityspalvelun testit:** idempotenssi, ”tuote on jo olemassa” -tapaus, virheiden käsittely, mockattu OFF.
+- **Käyttöliittymätestit (Maestro):** aloitus, kirjaus suosikista kahdella painalluksella, ylitys, uudelleenkäynnistys (kriteerit 1, 8, 9). Lisätään, kun näkymät vakiintuvat.
+- **Manuaalinen testaus omalla puhelimella:** kamera, lentotila, tekstin suurennus, ruudunlukija.
+- **Staattiset tarkistukset:** TypeScript `strict`, ESLint, Prettier. `npm run check` ajaa kaikki.
+- **Hyväksymistestauksen seuranta:** `docs/hyvaksymistestaus.md` listaa kriteerit 1–13 ja kunkin todentavan testin tai manuaalisen tarkistuksen.
+
+## 10. Ansainta (valmius)
+
+- `entitlements.has(feature: PremiumFeature): boolean` – v1:ssä `PremiumFeature` on tyhjä ja funktio palauttaa aina `false`.
+- Sääntö: P1-toimintoja ei koskaan kytketä `entitlements`-tarkistukseen (ANS-01, ANS-02, ANS-06).
+- Kun ansaintamalli valitaan (ANS-10), toteutus tehdään sovelluskauppojen ostorajapinnalla (esim. RevenueCat tai expo-iap) erillisen päätösmuistion pohjalta.
+
+## 11. Toteutusvaiheet
+
+Jokainen vaihe on pystyviipale, joka jättää sovelluksen käyttökelpoiseen tilaan. Vaihe on valmis, kun sen vaatimukset täyttyvät, testit menevät läpi ja toiminta on kokeiltu puhelimella.
+
+| Vaihe | Sisältö | Vaatimukset | Valmis, kun |
+| --- | --- | --- | --- |
+| 0. Pohja ja kokeilut | Monorepo, Expo-projekti, TypeScript strict, Vitest, Drizzle + migraatiot, `npm run check`. Kokeilut: viivakoodin luku omalla puhelimella, Finelin aineiston muunnos, OFF-testiympäristöön kirjoittaminen. | – | Tyhjä sovellus käynnistyy puhelimessa; kokeilujen tulokset kirjattu `docs/adr/`. |
+| 1. Paastopäivä ja pikakirjaus | Domain-laskenta, aloitus, Tänään-näkymä, pikakirjaus, muokkaus, poisto, ylitys | KAY-01…03, PAI-01…06, KIR-02, KIR-05…07, LAS-*, LAA-01, LAA-03, LAA-07, LAA-08 | Kriteerit 1, 3 ja 12 |
+| 2. Omat ruoat ja suosikit | Omat tuotteet, annokset, suosikit, suosikkiateriat, pikanapit | KIR-03, KIR-04, KIR-08, OMA-01…07, LAA-02 | Kriteerit 2, 7, 8, 10 |
+| 3. Fineli | Aineistoskripti, paikallinen haku, kirjaus Fineli-tuotteesta | HAK-02, HAK-03, HAK-04, LAS-06, TIE-03 | Fineli-osa kriteeristä 4 |
+| 4. OFF-haku ja viivakoodi | Nimihaku, viivakoodihaku kameralla ja käsin, välimuisti, oma korjaus | HAK-01, HAK-03…08, KAY-04, LAA-04, LAA-05 | Kriteerit 4 ja 9 |
+| 5. Historia ja tiedot | Historia, kopiointi, vienti, palautus, poisto | HIS-01…04 | Kriteeri 11 |
+| 6. OFF-julkaisu | Uusi tuote -lomake, kuvat, julkaisujono, välityspalvelu, tilat ja uudelleenyritys | OFF-01…10, TIE-01, TIE-04 | Kriteerit 5 ja 6 |
+| 7. Viimeistely ja v1 | Saavutettavuus, tekstit, tietolähdenäkymä, tietosuojaseloste, Google Play -julkaisu | LAA-06, TIE-03, TIE-05, ANS-01…04 | Kaikki P1-vaatimukset ja kriteeri 13 |
+
+Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
+
+## 12. Riskit ja avoimet kysymykset
+
+| Riski / kysymys | Vaikutus | Toimenpide |
+| --- | --- | --- |
+| OFF:n kirjoitusrajapinnan ehdot sovellustunnuksella tehtäville muokkauksille | Vaihe 6 voi muuttua | Selvitetään vaiheen 0 kokeilussa ja OFF:n ajantasaisista ohjeista; tarvittaessa yhteydenotto OFF:iin |
+| OFF-haun nopeusrajat | Haku tuntuu hitaalta tai estyy | Viive, välimuisti, paikallisten tulosten näyttäminen ensin; tarvittaessa välityspalvelun välimuisti |
+| Suomalaisten tuotteiden kattavuus OFF:ssa | Käyttäjä joutuu lisäämään tuotteita usein | OFF-julkaisu on juuri tätä varten; pikakirjaus toimii aina |
+| Finelin aineiston rakenne ja lisenssimaininta | Vaihe 3 | Varmistetaan vaiheen 0 kokeilussa |
+| Välityspalvelun väärinkäyttö | OFF:iin roskatuotteita sovelluksen nimissä | Nopeusrajoitus, palvelinpuolen validointi, mahdollisuus sulkea julkaisu etäkytkimellä |
+| iOS-tuki | Toissijainen kohderyhmä | Koodi pidetään alustariippumattomana; iOS-käännös EAS Buildilla vaiheen 7 jälkeen |
+| Tietosuoja Google Playssa | Julkaisu vaatii tietoturvaselosteen | Päiväkirja pysyy laitteella; välityspalvelu käsittelee vain julkaistavia tuotetietoja |
+
+## 13. Päätösmuistiot
+
+Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muistioina hakemistoon `docs/adr/` (`NNNN-otsikko.md`: tausta, päätös, seuraukset). Tämän suunnitelman päätökset toimivat lähtötilanteena; muistio kirjoitetaan, kun päätös muuttuu tai vaiheen 0 kokeilu tuottaa uutta tietoa.
+
+## 14. Muutoshistoria
+
+- **0.1 / 18.10.2026:** Ensimmäinen luonnos vaatimusmäärittelyn 0.2 pohjalta.
