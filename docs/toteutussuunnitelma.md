@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.1  
+Versio: 0.2  
 Päiväys: 18.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.2](../5-2-paasto-vaatimusmaarittely.md)
@@ -60,8 +60,8 @@ Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tek
 
 ```
 app/                    Expo-sovellus
-  app/                  Expo Router -reitit (näkymät)
   src/
+    app/                Expo Router -reitit (näkymät), ks. docs/adr/0001
     domain/             puhdas logiikka: energia, yksiköt, validointi, tilakoneet
     db/                 Drizzle-skeema, migraatiot, repositoriot
     services/           use-caset (kirjaus, suosikit, historia, vienti/palautus)
@@ -147,16 +147,16 @@ Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
 
 ### 5.1 Open Food Facts – haku
 
-- Viivakoodihaku: tuotteen haku viivakoodilla (API v2), pyydetään vain tarvittavat kentät (`fields=`).
-- Nimihaku: OFF:n hakurajapinta, suodatus maahan Suomi ensisijaisesti. Haku lähetetään vasta lyhyen viiveen jälkeen ja vähintään 3 merkillä, koska hakurajapinnan nopeusraja on tiukka **[tarkistettava: ajantasaiset rajat]**.
-- Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti.
+- Viivakoodihaku: tuotteen haku viivakoodilla (API v3; v2 on vanhentunut), pyydetään vain tarvittavat kentät (`fields=`). Lukuraja on 15 tuotehakua/min IP-osoitetta kohden (docs/adr/0004).
+- Nimihaku: OFF:n hakurajapinta, suodatus maahan Suomi ensisijaisesti. Hakurajapinnan raja on 10 hakua/min IP-osoitetta kohden, eikä OFF salli sen käyttöä näppäilyn mukana päivittyvään hakuun (tarkistettu 18.10.2026, docs/adr/0004). Siksi omat ja Fineli-tulokset näytetään heti paikallisesti, ja OFF-haku lähetetään vasta käyttäjän erillisellä toiminnolla (esim. ”Hae myös Open Food Factsista”) tai pitkän viiveen jälkeen vähintään 3 merkillä. Tekstihakuun arvioidaan vaiheessa 4 Search-a-licious-palvelu (`search.openfoodfacts.org`), koska v2-palvelinrajapinnassa ei ole tekstihakua.
+- Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti. Hakutulosten yhteydessä ja Tietolähteet-näkymässä mainitaan Open Food Facts ja lisenssi (ODbL) linkkeineen.
 - Haetut tuotteet tallennetaan `food`-tauluun välimuistiksi, jolloin ne toimivat jatkossa ilman verkkoa (LAA-04).
 - Hakutuloksessa näytetään nimi, merkki, energia perusteineen ja lähde (HAK-03). Puuttuva energia merkitään selvästi (HAK-04).
 
 ### 5.2 Fineli
 
-- Lähde: Finelin avoin data (lisenssi CC BY 4.0 **[tarkistettava]**).
-- `scripts/fineli/` lataa aineiston, muuntaa sen `fineli.db`:ksi ja tallentaa aineiston version. Skripti ajetaan käsin, kun Fineli julkaisee uuden version; tulos päivittyy käyttäjille sovelluspäivityksen mukana.
+- Lähde: THL:n ylläpitämän Finelin avoin data, lisenssi CC BY 4.0; lähteeksi mainitaan THL ja Fineli. Nykyinen julkaisu on hakutulosten mukaan Release 20. Julkaisunumero ja tarkka lisenssiteksti varmistetaan selaimella, koska fineli.fi estää automaattiset haut (docs/adr/0003).
+- Kehittäjä lataa peruspaketin (zip, puolipisteellä erotetut CSV-tiedostot) selaimella, ja `scripts/fineli/` muuntaa sen `fineli.db`:ksi ja tallentaa aineiston version. Energia on ravintotekijä `ENERC` (kJ/100 g syötävää osaa), joka muunnetaan kcal-arvoksi `kjToKcal`-funktiolla. Skripti ajetaan käsin, kun Fineli julkaisee uuden version; tulos päivittyy käyttäjille sovelluspäivityksen mukana.
 - Lisenssimaininta näytetään sovelluksen Tietolähteet-näkymässä (TIE-03).
 
 ### 5.3 Kesko
@@ -181,8 +181,8 @@ Ei käytetä v1:ssä (HAK-09). Selvitys tehdään erillisenä tehtävänä; arkk
 - Idempotenssi: `publish_job.id` lähetetään jokaisessa yrityksessä; jo käsitelty avain palauttaa aiemman tuloksen (OFF-08).
 - Vastaanottaa vain julkaistavat tuotekentät ja kuvat. Ei vastaanota eikä tallenna päiväkirjaa, kalorirajaa tai laitetunnisteita (OFF-04, TIE-01).
 - Nopeusrajoitus asennuskohtaisen satunnaistunnisteen ja IP-osoitteen perusteella väärinkäytön estämiseksi.
-- Merkitsee muokkaukset sovelluksen nimellä ja versiolla OFF:n ohjeiden mukaisesti **[tarkistettava: suositellut parametrit sovellusten kautta tehdyille muokkauksille ja kuvien lisenssiehdot]**.
-- Kehitys ja testaus tehdään yksinomaan OFF:n testiympäristöä vastaan; tuotantoympäristöä käytetään vain hallitussa varmennuksessa (kriteeri 5).
+- Merkitsee muokkaukset OFF:n ohjeiden mukaisesti parametreilla `app_name`, `app_version` ja `app_uuid` sekä `comment`-kentällä ilman henkilötietoja, ja välittää `cc=fi` ja `lc=fi`. Tuotemerkki lisätään `add_brands`-kentällä. Tiedot lisensoidaan Database Contents Licensella ja kuvat CC BY-SA -lisenssillä. OFF:n ehtojen mukaan tiedot otetaan pakkauksesta ja kuvat on otettava itse; muista tietokannoista kopiointi on kielletty (tarkistettu 18.10.2026, docs/adr/0004).
+- Kehitys ja testaus tehdään yksinomaan OFF:n testiympäristöä (`world.openfoodfacts.net`, HTTP Basic `off`/`off`, erillinen tilitietokanta) vastaan; tuotantoympäristöä käytetään vain hallitussa varmennuksessa (kriteeri 5). Ennen tuotantokäyttöä täytetään OFF:n API-käytön ilmoituslomake.
 
 ### 6.3 Lähteiden erottelu
 
@@ -260,10 +260,10 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 
 | Riski / kysymys | Vaikutus | Toimenpide |
 | --- | --- | --- |
-| OFF:n kirjoitusrajapinnan ehdot sovellustunnuksella tehtäville muokkauksille | Vaihe 6 voi muuttua | Selvitetään vaiheen 0 kokeilussa ja OFF:n ajantasaisista ohjeista; tarvittaessa yhteydenotto OFF:iin |
-| OFF-haun nopeusrajat | Haku tuntuu hitaalta tai estyy | Viive, välimuisti, paikallisten tulosten näyttäminen ensin; tarvittaessa välityspalvelun välimuisti |
+| OFF:n kirjoitusrajapinnan ehdot sovellustunnuksella tehtäville muokkauksille | Vaihe 6 voi muuttua | Ohjeet tarkistettu (docs/adr/0004): globaali sovellustili ja `app_*`-parametrit ovat sallittuja. Testiympäristökokeilu on tekemättä. |
+| OFF-haun nopeusrajat (15 tuotehakua ja 10 hakua/min/IP) | Haku tuntuu hitaalta tai estyy | Paikalliset tulokset ensin, OFF-haku erillisellä toiminnolla, välimuisti; Search-a-licious arvioidaan; tarvittaessa välityspalvelun välimuisti |
 | Suomalaisten tuotteiden kattavuus OFF:ssa | Käyttäjä joutuu lisäämään tuotteita usein | OFF-julkaisu on juuri tätä varten; pikakirjaus toimii aina |
-| Finelin aineiston rakenne ja lisenssimaininta | Vaihe 3 | Varmistetaan vaiheen 0 kokeilussa |
+| Finelin aineiston rakenne ja lisenssimaininta | Vaihe 3 | Rakenne ja lisenssi selvitetty (docs/adr/0003). fineli.fi estää automaattiset lataukset, joten aineisto ladataan käsin. |
 | Välityspalvelun väärinkäyttö | OFF:iin roskatuotteita sovelluksen nimissä | Nopeusrajoitus, palvelinpuolen validointi, mahdollisuus sulkea julkaisu etäkytkimellä |
 | iOS-tuki | Toissijainen kohderyhmä | Koodi pidetään alustariippumattomana; iOS-käännös EAS Buildilla vaiheen 7 jälkeen |
 | Tietosuoja Google Playssa | Julkaisu vaatii tietoturvaselosteen | Päiväkirja pysyy laitteella; välityspalvelu käsittelee vain julkaistavia tuotetietoja |
@@ -274,4 +274,5 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.2 / 18.10.2026:** Vaihe 0: [tarkistettava]-kohdat päivitetty OFF:n ja Finelin ajantasaisten ohjeiden mukaan (OFF-haun rajat ja nimihaun toteutus, API v3, sovellusmerkintä ja lisenssit, Finelin lisenssi ja lataustapa). Reitit ovat hakemistossa `app/src/app/` Expo SDK 58:n mukaisesti. Päätösmuistiot 0001–0004.
 - **0.1 / 18.10.2026:** Ensimmäinen luonnos vaatimusmäärittelyn 0.2 pohjalta.

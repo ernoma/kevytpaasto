@@ -21,11 +21,25 @@ Lue toteutussuunnitelman asiaankuuluva osa ennen työn aloittamista. Jos tehtäv
 
 ## Komennot
 
-Täydennetään vaiheessa 0, kun projekti on luotu.
+Vaatii Node.js 22.13+ (Expo SDK 58). Riippuvuudet asennetaan juuressa: `npm install`.
 
-- `npm run check` – tyypit, lint ja testit; ajetaan ennen kuin työ on valmis
-- `npm test` – Vitest
-- `npx expo start` – kehityspalvelin (hakemistossa `app/`)
+Juuressa:
+
+- `npm run check` – tyypit, lint, Prettier-tarkistus ja testit; ajetaan ennen kuin työ on valmis
+- `npm run typecheck` – `tsc --noEmit` kaikissa työtiloissa
+- `npm run lint` – ESLint (sis. `src/domain/`-kerroksen tuontirajoitukset)
+- `npm run format` / `npm run format:check` – Prettier (ei muotoile Markdownia)
+- `npm test` – Vitest kaikissa työtiloissa
+
+Hakemistossa `app/`:
+
+- `npx expo start` – kehityspalvelin; puhelimessa Expo Go (SDK 58) tai development build
+- `npx expo install <paketti>` – Expo-riippuvuudet aina tällä, ei `npm install`
+- `npm run db:generate` – uusi Drizzle-migraatio `src/db/schema.ts`:n muutoksista (`src/db/migrations/`)
+- `npx vitest run tests/domain` – yksittäinen testihakemisto
+- `npx expo-doctor` – riippuvuuksien ja konfiguraation tarkistus
+
+Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projektipohja.md`). Expo-kohtaiset ohjeet: `app/AGENTS.md`.
 
 ## Arkkitehtuurisäännöt
 

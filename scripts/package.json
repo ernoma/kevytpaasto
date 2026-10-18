@@ -1,0 +1,13 @@
+{
+  "name": "@kevytpaasto/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build-time data scripts (Fineli open data to SQLite, phase 3).",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}

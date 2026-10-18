@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native folders are generated (Continuous Native Generation)
+app/android/
+app/ios/
+
+# Native build artifacts and signing material
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# Logs and debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# Environment and secrets (OFF credentials live only in proxy secrets)
+.env
+.env*.local
+.dev.vars
+proxy/.wrangler/
+
+# Fineli source data downloaded by scripts (the built fineli.db is committed later in phase 3)
+scripts/fineli/data/
+
+# Test and coverage output
+coverage/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
