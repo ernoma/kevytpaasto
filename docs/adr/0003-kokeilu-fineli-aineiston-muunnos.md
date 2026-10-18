@@ -59,6 +59,11 @@ Fineli toimitetaan sovelluksen mukana vain luettavana `fineli.db`-tiedostona (su
 - **Merkkituotteita:** Finelissä on myös joitakin merkkituotteita (esim. *Ruisleipä, oululainen reilu ruisleipä, fazer*). HAK-07:n mukaisesti niitä ei yhdistetä OFF-tuotteisiin nimen perusteella.
 - **Valmistustavan kuvaus `preparation_state`-arvoksi:** RAW → `raw`; BOIL, BAK, FRIE, GRIL, ROAS, SMOK → `cooked`; IND, MIX, CANN, MASH, DRIE, FROZ, SALT, SOUR → `prepared`; X → `null`. Lisäksi näytetään Finelin oma suomenkielinen kuvaus.
 
-**Puhelin:** FTS5:n saatavuus ja hakuaika expo-sqlitessa tarkistetaan kehitystilan näkymällä `src/app/kokeilu-fts.tsx` (4 200 synteettistä riviä, sama taulumäärittely kuin muunnoksessa). Tulos kirjataan alle.
+**Puhelin (Expo Go, SDK 57, kehittäjän Android-puhelin).** Kehitystilan näkymä `src/app/kokeilu-fts.tsx` loi 4 200 synteettistä riviä samalla taulumäärittelyllä kuin muunnos:
+- SQLite 3.50.3, käännösasetuksissa `ENABLE_FTS3`, `ENABLE_FTS4` ja `ENABLE_FTS5`. FTS5-taulu `unicode61 remove_diacritics 0` -tokenisoijalla ja `prefix='2 3'`-indeksillä toimii.
+- 4 200 rivin lisäys 102 ms, FTS-indeksin rakennus 27 ms.
+- Kuusi prefiksihakua (20 osumaa kukin): 14,6–18,4 ms. Tavoite (< 100 ms) täyttyy. Aika sisältää JavaScriptin ja natiivikoodin välisen viiveen.
+- **Ongelma:** `closeAsync` epäonnistui virheellä ”unable to close due to unfinalized statements”, vaikka koodi käytti vain `execAsync`-, `getFirstAsync`- ja `getAllAsync`-kutsuja. Kun tiedosto sen jälkeen poistettiin auki olevana, Expo Go sulki sovelluksen. Ensimmäisellä ajolla sama virhe kaatoi sovelluksen käsittelemättömänä lupauksen hylkäyksenä. Syy jäi selvittämättä; ehdokkaita ovat FTS5-virtuaalitaulut tai expo-sqliten omat lausevälimuistit.
+- **Vaikutus vaiheeseen 3:** `fineli.db` avataan kerran ja pidetään auki sovelluksen ajan, joten sulkemista ei tarvita. Jos sulkeminen tai tiedoston vaihto tarvitaan (esim. aineistopäivitys), selvitetään ensin, toistuuko virhe ilman FTS-taulua, ja suljetaan yhteys ennen tiedoston poistoa tai korvaamista.
 
 **Avoimet kohdat ennen vaihetta 3:** virallisen Release 20 -paketin lataus, sen julkaisunumeron ja lisenssimaininnan tarkistus sivulta, muunnoksen ajo sillä ja vertailu fineli.fi-sivun arvoihin.

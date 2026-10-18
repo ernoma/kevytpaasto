@@ -20,6 +20,7 @@ export const strings = {
     ftsFailed: 'FTS5 ei ole käytettävissä:',
     query: (term: string, hits: number, ms: string) => `”${term}”: ${hits} osumaa, ${ms} ms`,
     rerun: 'Aja uudelleen',
+    done: 'Valmis.',
   },
   // Phase 0 experiment (docs/adr/0002). Shown only in development builds.
   barcodeExperiment: {
