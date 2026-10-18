@@ -73,7 +73,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 ## Käyttöliittymä
 
 - Kaikki käyttäjälle näkyvä teksti on suomeksi ja kootaan tiedostoon `src/ui/strings.fi.ts`.
-- Saavutettavuus: toiminnoilla on `accessibilityLabel`, ylitys tai virhe ei ilmene pelkästä väristä, ja asettelu kestää tekstin suurennuksen (LAA-06).
+- Saavutettavuus: toiminnoilla on `accessibilityLabel`, ylitys tai virhe ei ilmene pelkästä väristä, ja asettelu kestää tekstin suurennuksen (LAA-06). Painettavien kohteiden kosketusalue on vähintään 48 × 48 dp; pelkkää tekstiä ei käytetä painikkeena tai linkkinä ilman riittävää aluetta (vaiheen 0 havainto: tekstilinkkiin oli vaikea osua).
 - Sävy on neutraali: ei syyllistäviä viestejä (LAA-08).
 - Määräkentät hyväksyvät desimaalipilkun (LAS-05).
 
