@@ -1,7 +1,7 @@
 # 0003 – Kokeilu: Finelin avoimen aineiston muunnos SQLiteksi
 
 Päiväys: 18.10.2026  
-Tila: suunniteltu (kokeilu tekemättä)  
+Tila: hyväksytty (kokeilu tehty Release 18.0 -kopiolla 18.10.2026; virallinen Release 20 tarkistettava)  
 Liittyy: HAK-02, HAK-03, HAK-07, LAS-01, LAS-06, TIE-03, vaihe 3
 
 ## Tausta
@@ -33,6 +33,32 @@ Fineli toimitetaan sovelluksen mukana vain luettavana `fineli.db`-tiedostona (su
 4. Mittaa tiedoston koko ja hakuaika puhelimella (tavoite: haku ”kaurapuuro” alle 100 ms, tiedosto alle 5 MB).
 5. Pistokokeet: 10 tavallista ruokaa verrataan fineli.fi-sivun arvoihin (kcal/100 g, pyöristys vain vertailussa).
 
-## Tulokset
+## Tulokset (18.10.2026)
 
-Täydennetään kokeilun jälkeen.
+**Aineisto.** fineli.fi ei ollut kokeilupäivänä saavutettavissa selaimellakaan, joten kokeilu tehtiin epävirallisella GitHub-kopiolla [theel0ja/fineli-data](https://github.com/theel0ja/fineli-data), `basic-package-1`. Kopio on **Release 18.0** (commit 30.4.2017), ei nykyinen Release 20. Sitä ei käytetä sovelluksessa; virallinen paketti ladataan ennen vaihetta 3. Kopio on hakemistossa `scripts/fineli/data/` (gitignoressa).
+
+**Rakenne (Release 18.0, varmistettu):**
+- `descript.txt`: ”Copyright 2015 Terveyden ja hyvinvoinnin laitos (THL). Käyttöehdot: Creative Commons Nimeä 4.0 (CC-BY 4.0).” Paketissa on myös vastuunrajaus: THL ei vastaa tietojen virheistä, ja tietojen tulkinta on käyttäjän vastuulla. Tämä mainitaan Tietolähteet-näkymässä.
+- Tiedostot ovat ISO-8859-1-merkistöä (ääkköset), CRLF-rivinvaihdot, puolipiste-erotin ja desimaalipilkku (`1698,30`). `descript.txt` väittää ”ASCII-tekstitiedostoja”, mikä ei pidä paikkaansa. Muunnos tunnistaa UTF-8:n ja Latin-1:n automaattisesti, joten myös mahdollinen UTF-8-muotoinen Release 20 toimii.
+- `component.csv`: `ENERC;KJ` – energia on kJ/100 g syötävää osaa.
+- Lisäksi tiedostot englanniksi ja ruotsiksi sekä `specdiet*.csv` (erityisruokavaliot), joita v1 ei tarvitse.
+
+**Muunnos** (`npm run fineli:convert -w scripts -- <kansio|zip> [tulos.db] --release "…"`):
+- 4 058 elintarviketta (2 621 koostettua ruokaa, 1 437 raaka-ainetta). Release 20:ssä on Finelin sivun mukaan 4 232.
+- Energia puuttuu 7:ltä: Kaneli, Neilikka, Inkivääri (jauhettu), Kardemumma, parmankinkku, jalapeno-säilyke ja *Vesi, keitetty*. Fineli jättää ENERC-rivin pois myös vedeltä, joten sääntömme mukaan (HAK-04) se näkyy ”energia puuttuu” -tilassa eikä 0 kcal:na.
+- 19 198 annosyksikköä. Lähes kaikilla on `PORTS`/`PORTM`/`PORTL` (pieni/keskikokoinen/iso annos), monilla lisäksi `DL`, `RKL`, `TL`, `KPL_S/M/L` ja `KPL_VALM` (valmistajan kpl). Esim. *Kananmuna, keitetty*: keskikokoinen kpl 55 g.
+- Valmistustavat (`PROCESS`): BAK uunissa paistettu 1 023, IND teollinen 920, BOIL keitetty 738, MIX sekoitettu 408, RAW käsittelemätön tai tuore 349, FRIE paistettu 296, sekä DRIE, CANN, MASH, FROZ, GRIL, ROAS, SMOK, SALT, SOUR ja X (määrittelemätön).
+- `fineli.db` on 1,55 Mt FTS5-indeksin kanssa (tavoite < 5 Mt).
+- Haku Node.js:llä ja better-sqlite3:lla tällä koneella: 0,2–0,8 ms kymmenellä hakusanalla (tavoite < 100 ms).
+
+**Pistokokeet** (kcal/100 g, pyöristetty vain tässä): Banaani, kuorittu 88; Omena, kotimainen, kuorittu 41 (id 11060, sama kuin Finelin rajapintaesimerkissä); Kananmuna, keitetty 134; Riisi, keitetty, suolaton 137; Kaurahiutale 382; Maito, kevytmaito 46; Kaurapuuro, vesi, suolaa 48. Arvot ovat uskottavia. Vertailu fineli.fi-sivuun jäi tekemättä, koska sivu ei ollut saavutettavissa.
+
+**Havaintoja vaiheeseen 3:**
+- **Hakutulosten järjestys:** pelkkä FTS5 `rank` nostaa yhdyssanat edelle: ”omena” → *Omenahillo*, *Omenalastu*, … ennen raakaa omenaa. Vaiheessa 3 järjestetään ensin nimet, joiden ensimmäinen sana on täsmälleen hakusana (”Omena, …”), sitten raaka-aineet (`FOODTYPE = FOOD`) ja lopuksi muut.
+- **Punnittu kuorineen:** Finelissä on erikseen esim. *Banaani, kuorittu* (88) ja *Banaani, punnittu kuorineen* (58). Ero on näytettävä käyttäjälle selvästi (LAS-06).
+- **Merkkituotteita:** Finelissä on myös joitakin merkkituotteita (esim. *Ruisleipä, oululainen reilu ruisleipä, fazer*). HAK-07:n mukaisesti niitä ei yhdistetä OFF-tuotteisiin nimen perusteella.
+- **Valmistustavan kuvaus `preparation_state`-arvoksi:** RAW → `raw`; BOIL, BAK, FRIE, GRIL, ROAS, SMOK → `cooked`; IND, MIX, CANN, MASH, DRIE, FROZ, SALT, SOUR → `prepared`; X → `null`. Lisäksi näytetään Finelin oma suomenkielinen kuvaus.
+
+**Puhelin:** FTS5:n saatavuus ja hakuaika expo-sqlitessa tarkistetaan kehitystilan näkymällä `src/app/kokeilu-fts.tsx` (4 200 synteettistä riviä, sama taulumäärittely kuin muunnoksessa). Tulos kirjataan alle.
+
+**Avoimet kohdat ennen vaihetta 3:** virallisen Release 20 -paketin lataus, sen julkaisunumeron ja lisenssimaininnan tarkistus sivulta, muunnoksen ajo sillä ja vertailu fineli.fi-sivun arvoihin.

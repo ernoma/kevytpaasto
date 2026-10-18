@@ -8,6 +8,18 @@ export const strings = {
     dbMigrating: 'Tietokantaa valmistellaan…',
     dbError: 'Tietokannan valmistelu epäonnistui:',
     barcodeExperimentLink: 'Kokeilu: viivakoodin luku',
+    ftsExperimentLink: 'Kokeilu: tekstihaku (FTS5)',
+  },
+  // Phase 0 experiment (docs/adr/0003). Shown only in development builds.
+  ftsExperiment: {
+    title: 'Tekstihakukokeilu',
+    running: 'Tarkistetaan…',
+    sqliteVersion: (version: string) => `SQLite-versio: ${version}`,
+    ftsOk: (rows: number, insertMs: number) =>
+      `FTS5 toimii. ${rows} riviä lisätty ${insertMs} ms:ssa.`,
+    ftsFailed: 'FTS5 ei ole käytettävissä:',
+    query: (term: string, hits: number, ms: string) => `”${term}”: ${hits} osumaa, ${ms} ms`,
+    rerun: 'Aja uudelleen',
   },
   // Phase 0 experiment (docs/adr/0002). Shown only in development builds.
   barcodeExperiment: {

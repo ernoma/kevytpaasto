@@ -26,9 +26,14 @@ export default function HomeScreen() {
         {status}
       </Text>
       {__DEV__ ? (
-        <Link href="/kokeilu-viivakoodi" style={[styles.body, { color: colors.primary }]}>
-          {strings.home.barcodeExperimentLink}
-        </Link>
+        <>
+          <Link href="/kokeilu-viivakoodi" style={[styles.body, { color: colors.primary }]}>
+            {strings.home.barcodeExperimentLink}
+          </Link>
+          <Link href="/kokeilu-fts" style={[styles.body, { color: colors.primary }]}>
+            {strings.home.ftsExperimentLink}
+          </Link>
+        </>
       ) : null}
     </ScrollView>
   );
