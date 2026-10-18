@@ -16,6 +16,6 @@ Vaihe 0 tehtiin Expo SDK 58:lla. Kehittäjän Android-puhelimeen Play-kaupasta a
 
 ## Seuraukset
 
-- Sovellus avautuu Play-kaupan Expo Go -versiolla, joka tukee SDK 57:ää.
+- Sovellus avautuu Play-kaupan Expo Go -versiolla, joka tukee SDK 57:ää. Todennettu kehittäjän Android-puhelimella 18.10.2026: sovellus käynnistyy ja tietokannan migraatio ajetaan.
 - SDK 58:aan päivitetään myöhemmin omana tehtävänään (`npx expo install expo@^58 --fix`), kun Expo Go tukee sitä kehittäjän puhelimessa tai kun siirrytään development buildiin. Päivitys tehdään viimeistään ennen Google Play -julkaisua (vaihe 7).
 - Monorepossa React-versioita saa olla vain yksi; SDK-vaihdon jälkeen lukitustiedosto luodaan uudelleen ja tarkistetaan komennolla `npm ls react`.
