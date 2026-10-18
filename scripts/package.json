@@ -5,9 +5,17 @@
   "description": "Build-time data scripts (Fineli open data to SQLite, phase 3).",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fineli:convert": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON fineli/convert.ts",
+    "fineli:inspect": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON fineli/inspect.ts"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^24.19.2",
     "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "fflate": "^0.8.3"
   }
 }

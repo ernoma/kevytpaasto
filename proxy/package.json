@@ -5,9 +5,11 @@
   "description": "Serverless proxy for publishing products to Open Food Facts (phase 6).",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "off:staging": "node experiments/off-staging.ts"
   },
   "devDependencies": {
+    "@types/node": "^24.19.2",
     "typescript": "~6.0.3"
   }
 }

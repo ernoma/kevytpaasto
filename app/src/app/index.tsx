@@ -1,5 +1,5 @@
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { useTheme } from 'expo-router';
+import { Link, useTheme } from 'expo-router';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { db } from '@/db/client';
@@ -25,6 +25,11 @@ export default function HomeScreen() {
       <Text accessibilityLiveRegion="polite" style={[styles.body, { color: colors.text }]}>
         {status}
       </Text>
+      {__DEV__ ? (
+        <Link href="/kokeilu-viivakoodi" style={[styles.body, { color: colors.primary }]}>
+          {strings.home.barcodeExperimentLink}
+        </Link>
+      ) : null}
     </ScrollView>
   );
 }

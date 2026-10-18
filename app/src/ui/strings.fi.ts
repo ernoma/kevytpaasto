@@ -7,5 +7,38 @@ export const strings = {
     dbReady: 'Tietokanta on valmis.',
     dbMigrating: 'Tietokantaa valmistellaan…',
     dbError: 'Tietokannan valmistelu epäonnistui:',
+    barcodeExperimentLink: 'Kokeilu: viivakoodin luku',
+  },
+  // Phase 0 experiment (docs/adr/0002). Shown only in development builds.
+  barcodeExperiment: {
+    title: 'Viivakoodikokeilu',
+    intro:
+      'Lue pakkausten viivakoodeja ja vertaa tulosta pakkaukseen painettuun numeroon. Merkitse väärin luetut rivit.',
+    openCamera: 'Avaa kamera',
+    closeCamera: 'Sulje kamera',
+    scanNext: 'Lue seuraava',
+    permissionNeeded: 'Viivakoodin lukeminen kameralla vaatii kameraluvan.',
+    permissionDenied:
+      'Kameralupaa ei ole annettu. Voit sallia sen puhelimen asetuksista tai syöttää viivakoodin käsin.',
+    openSettings: 'Avaa asetukset',
+    manualLabel: 'Syötä viivakoodi käsin',
+    manualPlaceholder: 'Esim. 6410000000000',
+    manualSubmit: 'Tarkista',
+    resultsTitle: 'Tulokset',
+    noResults: 'Ei vielä luettuja koodeja.',
+    markWrong: 'Merkitse väärin luetuksi',
+    unmarkWrong: 'Poista väärin-merkintä',
+    wrongTag: 'Väärin luettu',
+    manualTag: 'Käsin',
+    share: 'Jaa tulokset',
+    clear: 'Tyhjennä tulokset',
+    summary: (total: number, wrong: number, fast: number, scanned: number, median: string) =>
+      `Luettu ${total}, väärin ${wrong}. Kameralla luetuista ${fast}/${scanned} alle 2 s, mediaani ${median}.`,
+    invalid: {
+      empty: 'Tyhjä',
+      not_digits: 'Sisältää muita merkkejä kuin numeroita',
+      bad_length: 'Väärä pituus',
+      bad_check_digit: 'Tarkistenumero ei täsmää',
+    },
   },
 } as const;
