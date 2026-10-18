@@ -10,12 +10,12 @@ Viivakoodihaku on tuotehaun nopein polku. Ennen vaihetta 4 halutaan tietää, lu
 
 ## Ajantasainen tieto (tarkistettu 18.10.2026)
 
-- Expo SDK 58:ssa viivakoodin luku tehdään `expo-camera`-paketin `CameraView`-komponentilla: `barcodeScannerSettings={{ barcodeTypes: [...] }}` ja `onBarcodeScanned`. Lupa pyydetään `useCameraPermissions`-koukulla.
+- Expo SDK 57:ssä ja 58:ssa viivakoodin luku tehdään `expo-camera`-paketin `CameraView`-komponentilla: `barcodeScannerSettings={{ barcodeTypes: [...] }}` ja `onBarcodeScanned`. Lupa pyydetään `useCameraPermissions`-koukulla.
 - Tuetut tyypit sisältävät kauppatuotteiden koodit `ean13`, `ean8`, `upc_a` ja `upc_e`.
 - Androidilla luku perustuu Google ML Kitiin. Moduuli sisältyy Expo Go -sovellukseen, joten kokeilu ei vaadi development buildia. Kamera toimii vain fyysisellä laitteella.
 - Konfiguraatiolisäosan `barcodeScannerEnabled`-asetus vaikuttaa Androidilla vain, jos `expo-camera` käännetään lähdekoodista; oletuksena lukija on mukana.
 
-Lähde: https://docs.expo.dev/versions/v58.0.0/sdk/camera/
+Lähteet: https://docs.expo.dev/versions/v57.0.0/sdk/camera/ ja https://docs.expo.dev/versions/v58.0.0/sdk/camera/ (projekti käyttää SDK 57:ää, ks. [0005](0005-expo-sdk-57.md))
 
 ## Kokeilusuunnitelma
 
