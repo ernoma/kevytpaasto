@@ -160,6 +160,11 @@ export const logEntry = sqliteTable(
     unit: text('unit', { enum: LOG_UNITS }).notNull(),
     energyKcalPerBasis: real('energy_kcal_per_basis'),
     energyBasis: text('energy_basis', { enum: ENERGY_BASES }),
+    // Serving as it was when logged, so that a serving-based entry can be explained and
+    // recalculated without reading the source food (KIR-08).
+    servingAmount: real('serving_amount'),
+    servingUnit: text('serving_unit', { enum: SERVING_UNITS }),
+    servingLabel: text('serving_label'),
     // Computed, unrounded energy (LAS-03).
     kcal: real('kcal').notNull(),
     originType: text('origin_type', { enum: ORIGIN_TYPES }).notNull(),
@@ -181,6 +186,11 @@ export const logEntry = sqliteTable(
       'log_entry_energy_per_basis_non_negative',
       sql`${t.energyKcalPerBasis} IS NULL OR ${t.energyKcalPerBasis} >= 0`,
     ),
+    check(
+      'log_entry_serving_unit',
+      sql`serving_unit IS NULL OR ${inList('serving_unit', SERVING_UNITS)}`,
+    ),
+    check('log_entry_serving_positive', sql`${t.servingAmount} IS NULL OR ${t.servingAmount} > 0`),
     check(
       'log_entry_meal_fraction_positive',
       sql`${t.mealFraction} IS NULL OR ${t.mealFraction} > 0`,

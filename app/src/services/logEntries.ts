@@ -2,10 +2,18 @@ import { eq } from 'drizzle-orm';
 
 import { fastDay, logEntry } from '@/db/schema';
 import { isNonNegativeNumber } from '@/domain/amount';
+import {
+  computeKcal,
+  type EnergyData,
+  type PortionInput,
+  type PortionUnit,
+} from '@/domain/portion';
 
 import type { ServiceContext } from './context';
 import { timestamp } from './context';
 import { ServiceError } from './errors';
+import { foodEnergy, requireActiveFood } from './foods';
+import { requireActiveMeal } from './meals';
 
 export type LogEntry = typeof logEntry.$inferSelect;
 
@@ -104,6 +112,198 @@ export function updateQuickEntry(
       name: normalizeName(changes.name),
       amount: changes.kcal,
       kcal: changes.kcal,
+      updatedAt: timestamp(ctx),
+    })
+    .where(eq(logEntry.id, id))
+    .returning()
+    .get()!;
+}
+
+export interface FoodEntryInput {
+  /** UUID created when the form opened (KIR-07). */
+  id: string;
+  fastDayId: string;
+  foodId: string;
+  amount: number;
+  unit: PortionUnit;
+}
+
+export interface MealEntryInput {
+  /** UUID created when the form opened (KIR-07). */
+  id: string;
+  fastDayId: string;
+  mealId: string;
+  /** Share of the whole meal, e.g. 0.5 for half (OMA-05). */
+  fraction: number;
+}
+
+function requireEntryId(id: string): void {
+  if (id.trim() === '') {
+    throw new ServiceError('invalid_input', 'Entry id is required');
+  }
+}
+
+function requireOrigin(entry: LogEntry, originType: LogEntry['originType']): void {
+  if (entry.originType !== originType) {
+    throw new ServiceError(
+      'origin_mismatch',
+      `Entry ${entry.id} was logged from ${entry.originType}, not ${originType}`,
+    );
+  }
+}
+
+function requireFraction(fraction: number): void {
+  if (!(Number.isFinite(fraction) && fraction > 0)) {
+    throw new ServiceError('invalid_amount', `Invalid meal fraction: ${fraction}`);
+  }
+}
+
+/** Computes energy for an amount, throwing the domain error as a service error. */
+function kcalOrThrow(input: PortionInput): number {
+  const result = computeKcal(input);
+  if (!result.ok) {
+    throw new ServiceError(result.error, `Cannot compute energy: ${result.error}`);
+  }
+  return result.kcal;
+}
+
+/** The energy data stored in an entry as it was when logged (KIR-08). */
+function entryEnergy(entry: LogEntry): EnergyData {
+  return {
+    energyKcal: entry.energyKcalPerBasis,
+    basis: entry.energyBasis,
+    serving: { amount: entry.servingAmount, unit: entry.servingUnit, label: entry.servingLabel },
+  };
+}
+
+/**
+ * Logs an amount of a food (KIR-03, KIR-04). Name, energy, basis and serving are copied to the
+ * entry as a snapshot, so later changes to the food do not affect it (KIR-08). Saving is
+ * idempotent by the form's UUID (KIR-07).
+ */
+export function saveFoodEntry(ctx: ServiceContext, input: FoodEntryInput): LogEntry {
+  requireEntryId(input.id);
+  return ctx.db.transaction((tx) => {
+    const txCtx = { ...ctx, db: tx };
+    const existing = getEntry(txCtx, input.id);
+    if (existing) {
+      requireOrigin(existing, 'food');
+      return updateFoodEntry(txCtx, input.id, { amount: input.amount, unit: input.unit });
+    }
+    requireFastDay(txCtx, input.fastDayId);
+    const source = requireActiveFood(txCtx, input.foodId);
+    const energy = foodEnergy(source);
+    const kcal = kcalOrThrow({ ...energy, amount: input.amount, unit: input.unit });
+    const now = timestamp(ctx);
+    return tx
+      .insert(logEntry)
+      .values({
+        id: input.id,
+        fastDayId: input.fastDayId,
+        createdAt: now,
+        updatedAt: now,
+        name: source.name,
+        amount: input.amount,
+        unit: input.unit,
+        energyKcalPerBasis: source.energyKcal,
+        energyBasis: source.energyBasis,
+        servingAmount: source.servingAmount,
+        servingUnit: source.servingUnit,
+        servingLabel: source.servingLabel,
+        kcal,
+        originType: 'food',
+        originId: source.id,
+      })
+      .returning()
+      .get();
+  });
+}
+
+/**
+ * Changes the amount of a food entry (KIR-05). The energy is recomputed from the entry's own
+ * snapshot, never from the current food (KIR-08).
+ */
+export function updateFoodEntry(
+  ctx: ServiceContext,
+  id: string,
+  changes: { amount: number; unit: PortionUnit },
+): LogEntry {
+  const existing = getEntry(ctx, id);
+  if (!existing) {
+    throw new ServiceError('not_found', `Entry ${id} not found`);
+  }
+  requireOrigin(existing, 'food');
+  const kcal = kcalOrThrow({ ...entryEnergy(existing), ...changes });
+  return ctx.db
+    .update(logEntry)
+    .set({ amount: changes.amount, unit: changes.unit, kcal, updatedAt: timestamp(ctx) })
+    .where(eq(logEntry.id, id))
+    .returning()
+    .get()!;
+}
+
+/**
+ * Logs a favourite meal or a share of it (OMA-04, OMA-05) as one entry. The energy of the
+ * whole meal is computed from its items now and stored as the entry's energy per serving, so
+ * later changes to the meal or its foods do not affect the entry (KIR-08).
+ */
+export function saveMealEntry(ctx: ServiceContext, input: MealEntryInput): LogEntry {
+  requireEntryId(input.id);
+  requireFraction(input.fraction);
+  return ctx.db.transaction((tx) => {
+    const txCtx = { ...ctx, db: tx };
+    const existing = getEntry(txCtx, input.id);
+    if (existing) {
+      requireOrigin(existing, 'meal');
+      return updateMealEntry(txCtx, input.id, { fraction: input.fraction });
+    }
+    requireFastDay(txCtx, input.fastDayId);
+    const details = requireActiveMeal(txCtx, input.mealId);
+    if (details.kcal === null) {
+      throw new ServiceError('missing_energy', `Energy of meal ${input.mealId} is unknown`);
+    }
+    const now = timestamp(ctx);
+    return tx
+      .insert(logEntry)
+      .values({
+        id: input.id,
+        fastDayId: input.fastDayId,
+        createdAt: now,
+        updatedAt: now,
+        name: details.meal.name,
+        amount: input.fraction,
+        unit: 'serving',
+        energyKcalPerBasis: details.kcal,
+        energyBasis: 'per_serving',
+        kcal: details.kcal * input.fraction,
+        originType: 'meal',
+        originId: details.meal.id,
+        mealFraction: input.fraction,
+      })
+      .returning()
+      .get();
+  });
+}
+
+/** Changes the share of a meal entry (KIR-05, OMA-05) using the entry's own snapshot (KIR-08). */
+export function updateMealEntry(
+  ctx: ServiceContext,
+  id: string,
+  changes: { fraction: number },
+): LogEntry {
+  requireFraction(changes.fraction);
+  const existing = getEntry(ctx, id);
+  if (!existing) {
+    throw new ServiceError('not_found', `Entry ${id} not found`);
+  }
+  requireOrigin(existing, 'meal');
+  const kcal = kcalOrThrow({ ...entryEnergy(existing), amount: changes.fraction, unit: 'serving' });
+  return ctx.db
+    .update(logEntry)
+    .set({
+      amount: changes.fraction,
+      mealFraction: changes.fraction,
+      kcal,
       updatedAt: timestamp(ctx),
     })
     .where(eq(logEntry.id, id))

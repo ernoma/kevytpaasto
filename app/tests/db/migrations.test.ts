@@ -1,4 +1,7 @@
-import type Database from 'better-sqlite3';
+import Database from 'better-sqlite3';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import * as schema from '@/db/schema';
@@ -6,6 +9,7 @@ import * as schema from '@/db/schema';
 import { createTestDb } from '../helpers/db';
 
 const now = '2026-10-18T08:00:00.000Z';
+const migrationsDir = fileURLToPath(new URL('../../src/db/migrations', import.meta.url));
 
 describe('database migrations', () => {
   let sqlite: Database.Database;
@@ -67,6 +71,36 @@ describe('database migrations', () => {
           updatedAt: now,
         })
         .run(),
+    ).toThrow();
+  });
+
+  it('KIR-08: 0001 keeps existing entries and adds an empty serving snapshot', () => {
+    const upgraded = new Database(':memory:');
+    upgraded.pragma('foreign_keys = ON');
+    const runMigration = (file: string) => {
+      for (const statement of readFileSync(join(migrationsDir, file), 'utf8').split(
+        '--> statement-breakpoint',
+      )) {
+        upgraded.exec(statement);
+      }
+    };
+    runMigration('0000_init.sql');
+    upgraded.exec(`
+      INSERT INTO fast_day VALUES ('d1', '2026-10-18', 600, '${now}');
+      INSERT INTO log_entry (id, fast_day_id, created_at, updated_at, name, amount, unit, kcal, origin_type)
+        VALUES ('e1', 'd1', '${now}', '${now}', 'Kahvi', 120, 'kcal', 120, 'quick');
+    `);
+    runMigration('0001_log_entry_serving.sql');
+    expect(upgraded.prepare("SELECT * FROM log_entry WHERE id = 'e1'").get()).toMatchObject({
+      name: 'Kahvi',
+      amount: 120,
+      kcal: 120,
+      serving_amount: null,
+      serving_unit: null,
+      serving_label: null,
+    });
+    expect(() =>
+      upgraded.exec("UPDATE log_entry SET serving_unit = 'kpl' WHERE id = 'e1'"),
     ).toThrow();
   });
 

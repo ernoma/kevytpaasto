@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.8  
+Versio: 0.9  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -115,11 +115,12 @@ Kaikki pääavaimet ovat sovelluksessa luotuja UUID-tunnisteita (KIR-07, HIS-03)
 - `name` (vapaaehtoinen pikakirjauksessa, KIR-02)
 - `amount`, `unit` (`g` | `ml` | `serving` | `kcal`)
 - `energy_kcal_per_basis`, `energy_basis` – kirjaushetken arvot
+- `serving_amount`, `serving_unit`, `serving_label` – annoksen koko ja nimi kirjaushetkellä, jotta annoksena kirjattu rivi voidaan selittää ja laskea uudelleen ilman lähdetuotetta (migraatio 0001)
 - `kcal` – laskettu, pyöristämätön energia
 - `origin_type` (`quick` | `food` | `meal`), `origin_id` (vain alkuperätieto, ei laskennan lähde)
 - `meal_fraction` – osuus suosikkiateriasta (OMA-05)
 
-Aterian kirjaus tallennetaan yhtenä rivinä, jonka energia on laskettu osista kirjaushetkellä. Kopiointi toiseen päivään (HIS-02) luo uuden rivin uudella UUID:llä.
+Aterian kirjaus tallennetaan yhtenä rivinä, jonka energia on laskettu osista kirjaushetkellä: `energy_kcal_per_basis` on koko aterian energia, `energy_basis = per_serving`, `unit = serving` ja `amount = meal_fraction`. Kopiointi toiseen päivään (HIS-02) luo uuden rivin uudella UUID:llä.
 
 **publish_job** – OFF-julkaisujono (OFF-07, OFF-08)
 - `id` (toimii myös idempotenssiavaimena välityspalvelulle), `food_id`, `barcode`
@@ -281,6 +282,8 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muistioina hakemistoon `docs/adr/` (`NNNN-otsikko.md`: tausta, päätös, seuraukset). Tämän suunnitelman päätökset toimivat lähtötilanteena; muistio kirjoitetaan, kun päätös muuttuu tai vaiheen 0 kokeilu tuottaa uutta tietoa.
 
 ## 14. Muutoshistoria
+
+- **0.9 / 25.10.2026:** Vaihe 2a: `log_entry` tallentaa annoksen koon, yksikön ja nimen tilannekuvana (migraatio 0001, KIR-08). Suosikkiruoan oletusannos on yksi annos; jos ruoalla ei ole annosta, pikanappi avaa Määrä-näkymän. Poistettu ruoka voi jäädä ateriaan, jossa se jo on, mutta sitä ei voi kirjata eikä lisätä uuteen ateriaan.
 
 - **0.8 / 25.10.2026:** Oletusrajan muutos kysyy, muutetaanko myös tämän päivän paastopäivän raja; aiempien päivien rajat eivät muutu (KAY-03, kriteeri 10). Tallennuksesta näytetään selvä vahvistus.
 - **0.7 / 25.10.2026:** Paluu Expo SDK 58:aan (React Native 0.88, React 19.3), koska kehittäjän puhelimen Expo Go on päivittynyt eikä enää avaa SDK 57 -projektia (päätösmuistio 0008).
