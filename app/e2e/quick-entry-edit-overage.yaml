@@ -16,6 +16,8 @@ appId: host.exp.exponent
 - tapOn:
     id: 'add-entry'
 - tapOn:
+    id: 'quick-entry'
+- tapOn:
     id: 'kcal-input'
 - inputText: '120,5'
 - tapOn:
@@ -29,6 +31,8 @@ appId: host.exp.exponent
 # KIR-02: energy alone is enough; PAI-03: the limit can be exceeded.
 - tapOn:
     id: 'add-entry'
+- tapOn:
+    id: 'quick-entry'
 - tapOn:
     id: 'kcal-input'
 - inputText: '400'

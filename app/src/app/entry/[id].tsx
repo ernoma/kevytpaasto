@@ -3,11 +3,22 @@ import { useCallback } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { formatDateFi } from '@/domain/format';
+import type { PortionUnit } from '@/domain/portion';
 import { listFastDays } from '@/services/fastDays';
-import { deleteEntry, getEntry, moveEntry, updateQuickEntry } from '@/services/logEntries';
+import {
+  deleteEntry,
+  entryEnergy,
+  getEntry,
+  moveEntry,
+  updateFoodEntry,
+  updateMealEntry,
+  updateQuickEntry,
+  type LogEntry,
+} from '@/services/logEntries';
 import { useServices } from '@/services/ServiceProvider';
 import { Button } from '@/ui/Button';
 import { useServiceQuery } from '@/ui/hooks';
+import { PortionForm } from '@/ui/PortionForm';
 import { QuickEntryForm } from '@/ui/QuickEntryForm';
 import { Screen } from '@/ui/Screen';
 import { strings } from '@/ui/strings.fi';
@@ -26,12 +37,10 @@ export default function EditEntryScreen() {
   const { data } = useServiceQuery(query);
   const { entry } = data;
 
-  if (!entry || entry.originType !== 'quick') {
+  if (!entry) {
     return (
       <Screen>
-        <Text style={[styles.body, { color: colors.text }]}>
-          {entry ? t.notQuickEntry : t.notFound}
-        </Text>
+        <Text style={[styles.body, { color: colors.text }]}>{t.notFound}</Text>
       </Screen>
     );
   }
@@ -54,13 +63,7 @@ export default function EditEntryScreen() {
 
   return (
     <Screen>
-      <QuickEntryForm
-        initial={entry}
-        onSave={({ kcal, name }) => {
-          updateQuickEntry(ctx, entry.id, { kcal, name });
-          router.back();
-        }}
-      />
+      <EntryForm entry={entry} />
       <Button label={t.delete} variant="destructive" onPress={confirmDelete} />
       <View style={styles.section}>
         <Text accessibilityRole="header" style={[styles.heading, { color: colors.text }]}>
@@ -83,6 +86,59 @@ export default function EditEntryScreen() {
         )}
       </View>
     </Screen>
+  );
+}
+
+/**
+ * The correction form for the entry's kind (KIR-05). Food and meal entries are recomputed from
+ * their own snapshot, never from the current food or meal (KIR-08).
+ */
+function EntryForm({ entry }: { entry: LogEntry }) {
+  const ctx = useServices();
+  if (entry.originType === 'food') {
+    return (
+      <PortionForm
+        kind="food"
+        energy={entryEnergy(entry)}
+        sourceText={t.snapshotSource}
+        initial={{ unit: entry.unit as PortionUnit, amount: entry.amount, name: entry.name ?? '' }}
+        editName
+        saveLabel={strings.portion.saveChanges}
+        onSave={({ amount, unit, name }) => {
+          updateFoodEntry(ctx, entry.id, { amount, unit, name });
+          router.back();
+        }}
+      />
+    );
+  }
+  if (entry.originType === 'meal') {
+    return (
+      <PortionForm
+        kind="meal"
+        energy={{ energyKcal: entry.energyKcalPerBasis, basis: 'per_serving' }}
+        sourceText={t.snapshotSource}
+        initial={{
+          unit: 'serving',
+          amount: entry.mealFraction ?? entry.amount,
+          name: entry.name ?? '',
+        }}
+        editName
+        saveLabel={strings.portion.saveChanges}
+        onSave={({ amount, name }) => {
+          updateMealEntry(ctx, entry.id, { fraction: amount, name });
+          router.back();
+        }}
+      />
+    );
+  }
+  return (
+    <QuickEntryForm
+      initial={entry}
+      onSave={({ kcal, name }) => {
+        updateQuickEntry(ctx, entry.id, { kcal, name });
+        router.back();
+      }}
+    />
   );
 }
 

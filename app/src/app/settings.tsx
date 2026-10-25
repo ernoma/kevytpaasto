@@ -59,6 +59,7 @@ export default function SettingsScreen() {
         onEdit={() => setSavedMessage(null)}
       />
       {savedMessage ? <Notice message={savedMessage} testID="settings-saved" /> : null}
+      <Button label={t.foodsLink} variant="secondary" onPress={() => router.push('/foods')} />
       {__DEV__ ? (
         <View style={styles.dev}>
           <Text accessibilityRole="header" style={[styles.heading, { color: colors.text }]}>

@@ -143,6 +143,18 @@ describe('logging foods and meals (KIR-03, KIR-04, KIR-08, OMA-03…07)', () => 
     expect(updated.updatedAt).not.toBe(updated.createdAt);
   });
 
+  it('KIR-05: the name of a food entry can be corrected but not cleared', () => {
+    saveFoodEntry(ctx, { id: 'e1', fastDayId: day.id, foodId: 'tuote', amount: 100, unit: 'g' });
+    const renamed = updateFoodEntry(ctx, 'e1', { amount: 100, unit: 'g', name: '  Leipä ' });
+    expect(renamed).toMatchObject({ name: 'Leipä', kcal: 80 });
+    expect(updateFoodEntry(ctx, 'e1', { amount: 50, unit: 'g' }).name).toBe('Leipä');
+    expectServiceError(
+      () => updateFoodEntry(ctx, 'e1', { amount: 50, unit: 'g', name: ' ' }),
+      'invalid_input',
+    );
+    expect(getEntry(ctx, 'e1')?.name).toBe('Leipä');
+  });
+
   it('OMA-06: a deleted food cannot be logged', () => {
     deleteFood(ctx, 'tuote');
     expectServiceError(
@@ -203,6 +215,17 @@ describe('logging foods and meals (KIR-03, KIR-04, KIR-08, OMA-03…07)', () => 
       const updated = updateMealEntry(ctx, 'e1', { fraction: 0.25 });
       expect(updated).toMatchObject({ amount: 0.25, mealFraction: 0.25 });
       expect(updated.kcal).toBeCloseTo(54, 10);
+    });
+
+    it('KIR-05: the name of a meal entry can be corrected', () => {
+      saveMealEntry(ctx, { id: 'e1', fastDayId: day.id, mealId: 'm1', fraction: 1 });
+      const renamed = updateMealEntry(ctx, 'e1', { fraction: 1, name: 'Iltapala' });
+      expect(renamed.name).toBe('Iltapala');
+      expect(renamed.kcal).toBeCloseTo(216, 10);
+      expectServiceError(
+        () => updateMealEntry(ctx, 'e1', { fraction: 1, name: '' }),
+        'invalid_input',
+      );
     });
 
     it('OMA-05: rejects a zero or negative share', () => {

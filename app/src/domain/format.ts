@@ -37,6 +37,23 @@ export function formatDateFi(date: string): string {
   return `${weekday} ${day}.${month}.${year}`;
 }
 
+/**
+ * Formats an amount or energy density for display with at most one decimal and a decimal
+ * comma (LAS-03, LAS-05): 12.5 → "12,5", 0.25 → "0,3", 1234 → "1 234".
+ */
+export function formatDecimal(value: number): string {
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`Value must be finite, got ${value}`);
+  }
+  const tenths = Math.round(Math.abs(value) * 10);
+  const whole = Math.floor(tenths / 10)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, THOUSANDS_SEPARATOR);
+  const decimal = tenths % 10;
+  const text = decimal === 0 ? whole : `${whole},${decimal}`;
+  return value < 0 && tenths !== 0 ? MINUS_SIGN + text : text;
+}
+
 /** Formats a stored number for an editable field with a decimal comma (LAS-05): 12.5 → "12,5". */
 export function formatAmountInput(value: number): string {
   if (!Number.isFinite(value)) {

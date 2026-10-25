@@ -1,0 +1,85 @@
+# A favourite food without a serving opens the amount view; editing and deleting the food does not
+# change the earlier entry (OMA-03, OMA-06, KIR-08, acceptance criterion 10).
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '600'
+- tapOn:
+    id: 'start-fast-day'
+# Through the add view: Expo Go's floating developer button can cover the header's settings button.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'manage-foods'
+- tapOn:
+    id: 'new-food'
+- tapOn:
+    id: 'food-name-input'
+- inputText: 'Leipä'
+- tapOn:
+    id: 'food-energy-input'
+- inputText: '250'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'food-favorite'
+- tapOn:
+    id: 'food-favorite'
+- scrollUntilVisible:
+    element:
+      id: 'save-food'
+- tapOn:
+    id: 'save-food'
+- pressKey: back
+- pressKey: back
+
+# Without a serving the quick button opens the amount view instead of guessing a portion.
+- assertVisible: 'valitse määrä'
+- tapOn: 'Valitse määrä: Leipä'
+- assertVisible: '250 kcal / 100 g'
+- tapOn:
+    id: 'amount-input'
+- inputText: '40'
+- hideKeyboard
+- assertVisible: 'Yhteensä 100 kcal'
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 500 kcal'
+
+# OMA-06, criterion 10: changing the food's energy does not change the entry.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'manage-foods'
+- tapOn: 'Leipä, .*Muokkaa'
+- assertVisible: 'Muokkaa ruokaa'
+- tapOn:
+    id: 'food-energy-input'
+- eraseText
+- inputText: '300'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'save-food'
+- tapOn:
+    id: 'save-food'
+- assertVisible: '300 kcal / 100 g'
+
+# OMA-06: a deleted food disappears from lists and favourites; the entry stays.
+- tapOn: 'Leipä, .*Muokkaa'
+- scrollUntilVisible:
+    element:
+      text: 'Poista ruoka'
+- tapOn: 'Poista ruoka'
+- assertVisible: 'Aiemmat kirjaukset säilyvät ennallaan.'
+- tapOn: 'Poista|POISTA'
+- assertVisible: 'Ei vielä omia ruokia.'
+- pressKey: back
+- pressKey: back
+- assertVisible: 'Jäljellä 500 kcal'
+- assertVisible: 'Leipä'
+- assertNotVisible: 'Suosikit'
+- takeScreenshot: after-food-delete

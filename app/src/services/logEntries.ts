@@ -168,7 +168,7 @@ function kcalOrThrow(input: PortionInput): number {
 }
 
 /** The energy data stored in an entry as it was when logged (KIR-08). */
-function entryEnergy(entry: LogEntry): EnergyData {
+export function entryEnergy(entry: LogEntry): EnergyData {
   return {
     energyKcal: entry.energyKcalPerBasis,
     basis: entry.energyBasis,
@@ -220,23 +220,40 @@ export function saveFoodEntry(ctx: ServiceContext, input: FoodEntryInput): LogEn
 }
 
 /**
- * Changes the amount of a food entry (KIR-05). The energy is recomputed from the entry's own
- * snapshot, never from the current food (KIR-08).
+ * A corrected name for a food or meal entry (KIR-05). Undefined keeps the current name; a
+ * blank name is rejected because the entry would no longer say what was eaten.
+ */
+function correctedName(name: string | undefined): { name?: string } {
+  if (name === undefined) {
+    return {};
+  }
+  const normalized = normalizeName(name);
+  if (normalized === null) {
+    throw new ServiceError('invalid_input', 'Name of a food or meal entry is required');
+  }
+  return { name: normalized };
+}
+
+/**
+ * Changes the amount and optionally the name of a food entry (KIR-05). The energy is
+ * recomputed from the entry's own snapshot, never from the current food (KIR-08).
  */
 export function updateFoodEntry(
   ctx: ServiceContext,
   id: string,
-  changes: { amount: number; unit: PortionUnit },
+  changes: { amount: number; unit: PortionUnit; name?: string },
 ): LogEntry {
   const existing = getEntry(ctx, id);
   if (!existing) {
     throw new ServiceError('not_found', `Entry ${id} not found`);
   }
   requireOrigin(existing, 'food');
-  const kcal = kcalOrThrow({ ...entryEnergy(existing), ...changes });
+  const name = correctedName(changes.name);
+  const { amount, unit } = changes;
+  const kcal = kcalOrThrow({ ...entryEnergy(existing), amount, unit });
   return ctx.db
     .update(logEntry)
-    .set({ amount: changes.amount, unit: changes.unit, kcal, updatedAt: timestamp(ctx) })
+    .set({ ...name, amount, unit, kcal, updatedAt: timestamp(ctx) })
     .where(eq(logEntry.id, id))
     .returning()
     .get()!;
@@ -285,11 +302,14 @@ export function saveMealEntry(ctx: ServiceContext, input: MealEntryInput): LogEn
   });
 }
 
-/** Changes the share of a meal entry (KIR-05, OMA-05) using the entry's own snapshot (KIR-08). */
+/**
+ * Changes the share and optionally the name of a meal entry (KIR-05, OMA-05) using the entry's
+ * own snapshot (KIR-08).
+ */
 export function updateMealEntry(
   ctx: ServiceContext,
   id: string,
-  changes: { fraction: number },
+  changes: { fraction: number; name?: string },
 ): LogEntry {
   requireFraction(changes.fraction);
   const existing = getEntry(ctx, id);
@@ -297,10 +317,12 @@ export function updateMealEntry(
     throw new ServiceError('not_found', `Entry ${id} not found`);
   }
   requireOrigin(existing, 'meal');
+  const name = correctedName(changes.name);
   const kcal = kcalOrThrow({ ...entryEnergy(existing), amount: changes.fraction, unit: 'serving' });
   return ctx.db
     .update(logEntry)
     .set({
+      ...name,
       amount: changes.fraction,
       mealFraction: changes.fraction,
       kcal,

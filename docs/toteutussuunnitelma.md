@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.9  
+Versio: 1.0  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -283,6 +283,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **1.0 / 25.10.2026:** Vaihe 2b: Lisää-, Määrä- sekä Omat ruoat ja ateriat -näkymät, Tänään-näkymän suosikkipikanapit ja kumoamisilmoitus (noin 8 s, LAA-02). Ruoka- ja ateriakirjauksen nimeä voi korjata (KIR-05); nimeä ei voi tyhjentää. Määrä alkaa yhdestä annoksesta, jos ruoalla on annos, muuten perusteen yksiköstä. Metron välimuisti sidotaan migraatiotiedostoihin, ja uusi migraatio todennetaan emulaattorissa päivityksenä (päätösmuistio 0009).
 - **0.9 / 25.10.2026:** Vaihe 2a: `log_entry` tallentaa annoksen koon, yksikön ja nimen tilannekuvana (migraatio 0001, KIR-08). Suosikkiruoan oletusannos on yksi annos; jos ruoalla ei ole annosta, pikanappi avaa Määrä-näkymän. Poistettu ruoka voi jäädä ateriaan, jossa se jo on, mutta sitä ei voi kirjata eikä lisätä uuteen ateriaan.
 
 - **0.8 / 25.10.2026:** Oletusrajan muutos kysyy, muutetaanko myös tämän päivän paastopäivän raja; aiempien päivien rajat eivät muutu (KAY-03, kriteeri 10). Tallennuksesta näytetään selvä vahvistus.

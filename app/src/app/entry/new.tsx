@@ -19,7 +19,8 @@ export default function NewEntryScreen() {
       <QuickEntryForm
         onSave={({ kcal, name }) => {
           saveQuickEntry(ctx, { id, fastDayId, kcal, name });
-          router.back();
+          // Back to the day view past the add view.
+          router.dismissTo('/');
         }}
       />
     </Screen>

@@ -1,0 +1,79 @@
+# Acceptance criterion 2 in the UI: an own food of 80 kcal/100 g logged as 150 g shows 120 kcal
+# before saving and leaves 480 kcal of a 600 kcal limit (OMA-01, KIR-01, KIR-03, KIR-04, LAS-05).
+# The entry's name and amount can be corrected afterwards (KIR-05, KIR-08).
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '600'
+- tapOn:
+    id: 'start-fast-day'
+
+# KIR-01: the add view offers quick entry, favourites and own foods.
+- tapOn:
+    id: 'add-entry'
+- assertVisible: 'Pikakirjaus \(kcal\)'
+- assertVisible: 'Ei vielä omia ruokia.'
+- takeScreenshot: add-empty
+- tapOn:
+    id: 'manage-foods'
+
+# OMA-01: an own food needs only a name and energy with its basis (default per 100 g).
+- tapOn:
+    id: 'new-food'
+- tapOn:
+    id: 'food-name-input'
+- inputText: 'Testituote'
+- tapOn:
+    id: 'food-energy-input'
+- inputText: '80'
+- hideKeyboard
+- takeScreenshot: food-form
+- scrollUntilVisible:
+    element:
+      id: 'save-food'
+- tapOn:
+    id: 'save-food'
+- assertVisible: '80 kcal / 100 g'
+- pressKey: back
+
+# KIR-03, KIR-04: the amount view shows the basis and the computed energy before saving.
+- tapOn: 'Testituote.*Valitse määrä'
+- assertVisible: '80 kcal / 100 g'
+- assertVisible: 'Lähde: oma ruoka'
+- assertVisible: 'Kaloreita ei voi vielä laskea.'
+- tapOn:
+    id: 'amount-input'
+- inputText: '150'
+- hideKeyboard
+- assertVisible: 'Yhteensä 120 kcal'
+- takeScreenshot: portion
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 480 kcal'
+- assertVisible: 'Testituote'
+
+# KIR-05: name and amount are corrected; energy is recomputed from the snapshot (KIR-08).
+- tapOn: 'Testituote, .*Muokkaa kirjausta'
+- assertVisible: 'Kirjaushetken tiedot.*'
+- tapOn:
+    id: 'entry-name-input'
+- eraseText
+- inputText: 'Korjattu tuote'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'amount-input'
+- tapOn:
+    id: 'amount-input'
+- eraseText
+- inputText: '100,5'
+- hideKeyboard
+- assertVisible: 'Yhteensä 80 kcal'
+- takeScreenshot: edit-food-entry
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 520 kcal'
+- assertVisible: 'Korjattu tuote'

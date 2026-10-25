@@ -1,0 +1,166 @@
+# Acceptance criteria 7 and 8: a private favourite meal is built from own foods and its default
+# portion is added from the day view with one tap; the addition can be undone (OMA-02…05,
+# LAA-02, KIR-05). Nothing here is published (OMA-07).
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '600'
+- tapOn:
+    id: 'start-fast-day'
+# Through the add view: Expo Go's floating developer button can cover the header's settings button.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'manage-foods'
+
+# OMA-02, OMA-03: a favourite food with a named default serving.
+- tapOn:
+    id: 'new-food'
+- tapOn:
+    id: 'food-name-input'
+- inputText: 'Jogurtti'
+- tapOn:
+    id: 'food-energy-input'
+- inputText: '70'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'serving-amount-input'
+- tapOn:
+    id: 'serving-label-input'
+- inputText: 'purkki'
+- hideKeyboard
+- tapOn:
+    id: 'serving-amount-input'
+- inputText: '200'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'food-favorite'
+- tapOn:
+    id: 'food-favorite'
+- scrollUntilVisible:
+    element:
+      id: 'save-food'
+- tapOn:
+    id: 'save-food'
+
+# LAS-02: a food per 100 ml is logged in millilitres.
+- tapOn:
+    id: 'new-food'
+- tapOn:
+    id: 'food-name-input'
+- inputText: 'Maito'
+- tapOn:
+    id: 'food-energy-input'
+- inputText: '38'
+- hideKeyboard
+- tapOn:
+    id: 'basis-per_100ml'
+- scrollUntilVisible:
+    element:
+      id: 'save-food'
+- tapOn:
+    id: 'save-food'
+- assertVisible: '★ Suosikki'
+- takeScreenshot: foods-list
+
+# OMA-04: the meal's energy is computed from its items: 140 + 76 = 216 kcal.
+- tapOn:
+    id: 'new-meal'
+- tapOn:
+    id: 'meal-name-input'
+- inputText: 'Aamupala'
+- hideKeyboard
+- tapOn:
+    id: 'add-meal-item'
+- tapOn:
+    id: 'pick-Jogurtti'
+- assertVisible: '140 kcal'
+- scrollUntilVisible:
+    element:
+      id: 'add-meal-item'
+- tapOn:
+    id: 'add-meal-item'
+- scrollUntilVisible:
+    element:
+      id: 'pick-Maito'
+- tapOn:
+    id: 'pick-Maito'
+- scrollUntilVisible:
+    element:
+      id: 'item-1-amount'
+- tapOn:
+    id: 'item-1-amount'
+- inputText: '200'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'meal-total'
+- assertVisible: 'Koko ateria 216 kcal'
+- takeScreenshot: meal-form
+- scrollUntilVisible:
+    element:
+      id: 'save-meal'
+- tapOn:
+    id: 'save-meal'
+- assertVisible: 'Aamupala'
+- pressKey: back
+- pressKey: back
+- assertVisible: 'Jäljellä 600 kcal'
+
+# Criterion 8, LAA-02: one tap on the quick button adds the whole meal, no keyboard needed.
+- assertVisible: 'Suosikit'
+- tapOn: 'Lisää Aamupala, 216 kcal'
+- assertVisible: 'Jäljellä 384 kcal'
+- assertVisible: '.*Lisätty: Aamupala, 216 kcal.*'
+- takeScreenshot: favorite-added
+
+# OMA-03: a favourite food's default serving; LAA-02: the addition can be undone.
+- tapOn: 'Lisää Jogurtti, 140 kcal'
+- assertVisible: 'Jäljellä 244 kcal'
+- tapOn:
+    id: 'undo'
+- assertVisible: 'Jäljellä 384 kcal'
+- assertNotVisible:
+    id: 'undo-banner'
+
+# OMA-05: half of the meal through the amount view.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    text: 'Aamupala.*Valitse määrä'
+    index: 0
+- assertVisible: 'Koko ateria 216 kcal'
+- assertVisible: 'Lähde: oma ateria, laskettu osista'
+- tapOn:
+    id: 'share-0.5'
+- assertVisible: 'Yhteensä 108 kcal'
+- takeScreenshot: meal-portion
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 276 kcal'
+
+# KIR-05: the share and name of a meal entry are corrected from its snapshot.
+- tapOn: 'Aamupala, 108 kcal.*'
+- tapOn:
+    id: 'entry-name-input'
+- eraseText
+- inputText: 'Puolikas aamupala'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'amount-input'
+- tapOn:
+    id: 'amount-input'
+- eraseText
+- inputText: '0,25'
+- hideKeyboard
+- assertVisible: 'Yhteensä 54 kcal'
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 330 kcal'
+- assertVisible: 'Puolikas aamupala'

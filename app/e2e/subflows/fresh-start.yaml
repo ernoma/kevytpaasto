@@ -12,3 +12,12 @@ appId: host.exp.exponent
 - extendedWaitUntil:
     visible: 'Tervetuloa'
     timeout: 60000
+# Expo Go may open its developer menu only after the app has loaded (seen after a Metro restart).
+- runFlow:
+    when:
+      visible: 'Go home'
+    commands:
+      - pressKey: back
+- extendedWaitUntil:
+    notVisible: 'Go home'
+    timeout: 5000

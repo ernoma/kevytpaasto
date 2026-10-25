@@ -45,6 +45,11 @@ function MigrationGate() {
           options={{ title: strings.entry.newTitle, presentation: 'modal' }}
         />
         <Stack.Screen name="entry/[id]" options={{ title: strings.entry.editTitle }} />
+        <Stack.Screen name="add" options={{ title: strings.add.title }} />
+        <Stack.Screen name="portion" options={{ title: strings.portion.title }} />
+        <Stack.Screen name="foods" options={{ title: strings.foods.title }} />
+        <Stack.Screen name="food-edit" options={{ title: strings.foodForm.newTitle }} />
+        <Stack.Screen name="meal-edit" options={{ title: strings.mealForm.newTitle }} />
         <Stack.Screen name="day-limit" options={{ title: strings.dayLimit.title }} />
         <Stack.Screen name="settings" options={{ title: strings.settings.title }} />
       </Stack>

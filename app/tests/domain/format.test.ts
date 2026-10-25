@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatAmountInput, formatDateFi } from '@/domain/format';
+import { formatAmountInput, formatDateFi, formatDecimal } from '@/domain/format';
+
+describe('formatDecimal (LAS-03, LAS-05)', () => {
+  it('shows at most one decimal with a decimal comma', () => {
+    expect(formatDecimal(12.5)).toBe('12,5');
+    expect(formatDecimal(0.25)).toBe('0,3');
+    expect(formatDecimal(80)).toBe('80');
+    expect(formatDecimal(1234.04)).toBe('1 234');
+  });
+
+  it('does not show a negative zero', () => {
+    expect(formatDecimal(-0.01)).toBe('0');
+    expect(formatDecimal(-1.5)).toBe('−1,5');
+  });
+});
 
 describe('formatDateFi (PAI-02, PAI-05)', () => {
   it('PAI-02: shows the weekday and the date without leading zeros', () => {

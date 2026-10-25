@@ -36,3 +36,5 @@ Vaiheessa 0 kaikki käyttöliittymän tarkistukset tehtiin kehittäjän puhelime
 - Emulaattori on hidas kehittäjän koneella (i5-4690K): käynnistys noin minuutin ja ensimmäinen latauskerta useita minuutteja. Emulaattori kannattaa pitää käynnissä koko session ajan.
 - Maestro-testien tekstihaut käyttävät `strings.fi.ts`:n tekstejä. Kun teksti muuttuu, testi on päivitettävä.
 - Kuvakaappaukset tallentuvat hakemistoon `app/e2e/output/`, jota ei viedä versionhallintaan.
+- Vaihe 2b: Metro ei seuraa hakemistoa `app/e2e/output/` (`resolver.blockList`). Ilman rajausta Metro käytti joutoajallakin noin puolitoista ydintä. Emulaattorin järjestelmä alkoi silloin antaa ANR-ilmoituksia (”System UI isn't responding”), ja kerran emulaattori kaatui kesken ajon. Ilmoitus peittää sovelluksen, ja testi epäonnistuu syystä, joka ei liity sovellukseen.
+- Expo Go voi avata kehitysvalikon vasta sovelluksen latauduttua. `subflows/fresh-start.yaml` sulkee valikon myös silloin. Omat ruoat ja ateriat avataan flow'issa Lisää-näkymän kautta, ei yläpalkin Asetukset-painikkeesta.
