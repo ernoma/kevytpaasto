@@ -11,8 +11,11 @@ interface TextFieldProps extends Pick<
   /** Shown as text below the field, never as colour alone (LAA-06). */
   error?: string | null;
   hint?: string;
-  /** "decimal" shows a numeric keyboard with a decimal separator (LAS-05). */
-  kind?: 'text' | 'decimal';
+  /**
+   * "decimal" shows a numeric keyboard with a decimal separator (LAS-05); "search" turns off
+   * capitalisation and autocorrect.
+   */
+  kind?: 'text' | 'decimal' | 'search';
   testID?: string;
 }
 
@@ -27,7 +30,8 @@ export function TextField({ label, error, hint, kind = 'text', testID, ...input 
         accessibilityLabel={label}
         accessibilityHint={description ?? undefined}
         keyboardType={kind === 'decimal' ? 'decimal-pad' : 'default'}
-        autoCapitalize={kind === 'decimal' ? 'none' : 'sentences'}
+        autoCapitalize={kind === 'text' ? 'sentences' : 'none'}
+        autoCorrect={kind !== 'search'}
         placeholderTextColor={colors.border}
         testID={testID}
         style={[

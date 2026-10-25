@@ -2,9 +2,11 @@ import { router, useLocalSearchParams, useTheme } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
+import { defaultFineliServing } from '@/domain/fineli';
 import { initialPortion } from '@/domain/portionForm';
+import { fineliEnergy, getFineliFood, isFineliAvailable } from '@/services/fineli';
 import { foodEnergy, getFood } from '@/services/foods';
-import { saveFoodEntry, saveMealEntry } from '@/services/logEntries';
+import { saveFineliEntry, saveFoodEntry, saveMealEntry } from '@/services/logEntries';
 import { getMeal } from '@/services/meals';
 import { useServices } from '@/services/ServiceProvider';
 import { useServiceQuery } from '@/ui/hooks';
@@ -21,10 +23,11 @@ const t = strings.portion;
 export default function PortionScreen() {
   const ctx = useServices();
   const { colors } = useTheme();
-  const { fastDayId, foodId, mealId } = useLocalSearchParams<{
+  const { fastDayId, foodId, mealId, fineliId } = useLocalSearchParams<{
     fastDayId: string;
     foodId?: string;
     mealId?: string;
+    fineliId?: string;
   }>();
   // KIR-07: the entry's UUID is created when the form opens, so repeating the save cannot add
   // a second row.
@@ -33,8 +36,9 @@ export default function PortionScreen() {
     () => ({
       food: foodId ? getFood(ctx, foodId) : null,
       meal: mealId ? getMeal(ctx, mealId) : null,
+      fineli: fineliId && isFineliAvailable(ctx) ? getFineliFood(ctx, Number(fineliId)) : null,
     }),
-    [ctx, foodId, mealId],
+    [ctx, foodId, mealId, fineliId],
   );
   const { data } = useServiceQuery(query);
 
@@ -65,6 +69,49 @@ export default function PortionScreen() {
           saveLabel={t.save}
           onSave={({ amount, unit }) => {
             saveFoodEntry(ctx, { id, fastDayId, foodId: food.id, amount, unit });
+            done();
+          }}
+        />
+      </Screen>
+    );
+  }
+
+  if (data.fineli) {
+    const item = data.fineli;
+    if (item.energyKcal === null) return message(t.cannotLog);
+    // Household units in grams; the medium portion is preselected and copied with the food.
+    const servingChoices = item.servings.map((s) => ({
+      key: s.unit,
+      serving: { amount: s.massG, unit: 'g' as const, label: strings.fineliUnits[s.unit] },
+    }));
+    const defaultServing = defaultFineliServing(item.servings);
+    const defaultChoice = servingChoices.find((s) => s.key === defaultServing?.unit) ?? null;
+    return (
+      <Screen>
+        <Text accessibilityRole="header" style={[styles.heading, { color: colors.text }]}>
+          {item.name}
+        </Text>
+        <PortionForm
+          kind="food"
+          energy={fineliEnergy(item)}
+          servingChoices={servingChoices}
+          sourceText={t.sourceFineli(item.processFi)}
+          initial={
+            defaultChoice
+              ? { unit: 'serving', amount: 1, servingKey: defaultChoice.key }
+              : { unit: 'g', amount: null }
+          }
+          saveLabel={t.save}
+          onSave={({ amount, unit, serving }) => {
+            saveFineliEntry(ctx, {
+              id,
+              fastDayId,
+              fineliId: item.id,
+              amount,
+              unit: unit === 'serving' ? 'serving' : 'g',
+              serving: serving ?? null,
+              defaultServing: defaultChoice?.serving ?? null,
+            });
             done();
           }}
         />

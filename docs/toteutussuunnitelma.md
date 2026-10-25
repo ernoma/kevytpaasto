@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 1.0  
+Versio: 1.1  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -132,6 +132,8 @@ Aterian kirjaus tallennetaan yhtenä rivinä, jonka energia on laskettu osista k
 
 Erillinen, vain luettava `fineli.db`, joka liitetään yhteyteen (`ATTACH`). Sisältää ruoan tunnisteen, suomenkielisen nimen, energian (kcal/100 g, muunnettuna kJ-arvosta tarvittaessa), valmistustavan sekä FTS5-hakuindeksin. Kun Fineli-tuote kirjataan, sen tiedot kopioidaan `food`-tauluun (`source = fineli`), jolloin myöhemmät aineistopäivitykset eivät vaikuta vanhoihin kirjauksiin.
 
+Tiedosto on hakemistossa `app/assets/fineli/` ja kulkee sovelluksen mukana assetina. Käynnistyksessä se kopioidaan SQLite-hakemistoon ja liitetään nimellä `fineli`. Kopio korvataan, kun `fineli.json`:n muunnosaika muuttuu. Ruokamitat (esim. keskikokoinen annos, dl) tarjotaan annoksina grammamäärineen, ja kirjaus tallentaa valitun mitan tilannekuvana (päätösmuistio 0010).
+
 ## 4. Domain-logiikka
 
 Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
@@ -157,9 +159,10 @@ Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
 
 ### 5.2 Fineli
 
-- Lähde: THL:n ylläpitämän Finelin avoin data, lisenssi CC BY 4.0; lähteeksi mainitaan THL ja Fineli. Nykyinen julkaisu on hakutulosten mukaan Release 20. Julkaisunumero ja tarkka lisenssiteksti varmistetaan selaimella, koska fineli.fi estää automaattiset haut (docs/adr/0003).
+- Lähde: THL:n ylläpitämän Finelin avoin data, lisenssi CC BY 4.0. Käytössä on Release 20.0 (2019). Lähteeksi mainitaan THL:n suosittelema viite: ”Terveyden ja hyvinvoinnin laitos (THL), Kansanterveyden edistäminen -yksikkö. Fineli. Elintarvikkeiden koostumustietokanta. Versio 20. Helsinki 2019.” Palvelua ei saa esittää THL:n tuottamana tai suosittelemana (docs/adr/0003, docs/adr/0010).
 - Kehittäjä lataa peruspaketin (zip, puolipisteellä erotetut CSV-tiedostot) selaimella, ja `scripts/fineli/` muuntaa sen `fineli.db`:ksi ja tallentaa aineiston version. Energia on ravintotekijä `ENERC` (kJ/100 g syötävää osaa), joka muunnetaan kcal-arvoksi `kjToKcal`-funktiolla. Skripti ajetaan käsin, kun Fineli julkaisee uuden version; tulos päivittyy käyttäjille sovelluspäivityksen mukana.
-- Lisenssimaininta näytetään sovelluksen Tietolähteet-näkymässä (TIE-03).
+- Lisenssimaininta näytetään sovelluksen Tietolähteet-näkymässä (Asetukset → Tietolähteet ja lisenssit) ja lyhyenä Fineli-hakutulosten alla (TIE-03).
+- Haku on paikallinen eikä tarvitse verkkoa. Sanoja verrataan sanan alkuun FTS5-prefiksihaulla, ja vähintään kolmen merkin sanat löytyvät myös yhdyssanan keskeltä. Ensin näytetään nimet, joiden ensimmäinen sana on hakusana, ja raaka-aineet ennen koostettuja ruokia (docs/adr/0010).
 
 ### 5.3 Kesko
 
@@ -283,6 +286,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **1.1 / 25.10.2026:** Vaihe 3: Fineli Release 20.0 sovelluksen mukana (`app/assets/fineli/`), liitetään käynnistyksessä. Lisää-näkymässä on paikallinen haku omista ruoista ja Finelistä. Fineli-tuote kopioidaan `food`-tauluun ensimmäisellä kirjauksella, ja sen ruokamitat ovat valittavissa annoksina. Tietolähteet-näkymä näyttää THL:n suositteleman viitteen ja lisenssin. Skeema ei muuttunut (päätösmuistio 0010).
 - **1.0 / 25.10.2026:** Vaihe 2b: Lisää-, Määrä- sekä Omat ruoat ja ateriat -näkymät, Tänään-näkymän suosikkipikanapit ja kumoamisilmoitus (noin 8 s, LAA-02). Ruoka- ja ateriakirjauksen nimeä voi korjata (KIR-05); nimeä ei voi tyhjentää. Määrä alkaa yhdestä annoksesta, jos ruoalla on annos, muuten perusteen yksiköstä. Metron välimuisti sidotaan migraatiotiedostoihin, ja uusi migraatio todennetaan emulaattorissa päivityksenä (päätösmuistio 0009).
 - **0.9 / 25.10.2026:** Vaihe 2a: `log_entry` tallentaa annoksen koon, yksikön ja nimen tilannekuvana (migraatio 0001, KIR-08). Suosikkiruoan oletusannos on yksi annos; jos ruoalla ei ole annosta, pikanappi avaa Määrä-näkymän. Poistettu ruoka voi jäädä ateriaan, jossa se jo on, mutta sitä ei voi kirjata eikä lisätä uuteen ateriaan.
 

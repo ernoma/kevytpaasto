@@ -8,6 +8,8 @@ const config = getDefaultConfig(__dirname);
 
 // Drizzle migrations are imported as .sql files (see babel.config.js).
 config.resolver.sourceExts.push('sql');
+// The bundled read-only Fineli database (src/db/fineli.ts).
+config.resolver.assetExts.push('db');
 
 // Maestro writes logs and screenshots under e2e/output on every run; Metro need not watch them.
 config.resolver.blockList = [/[\\/]e2e[\\/]output[\\/].*/];

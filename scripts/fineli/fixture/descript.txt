@@ -1,0 +1,2 @@
+Test fixture for scripts/fineli and the app's tests: invented values in the Fineli package format, not Fineli data.
+Versio. Version. Release. 99.0

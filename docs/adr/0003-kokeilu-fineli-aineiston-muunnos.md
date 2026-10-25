@@ -67,3 +67,5 @@ Fineli toimitetaan sovelluksen mukana vain luettavana `fineli.db`-tiedostona (su
 - **Vaikutus vaiheeseen 3:** `fineli.db` avataan kerran ja pidetään auki sovelluksen ajan, joten sulkemista ei tarvita. Jos sulkeminen tai tiedoston vaihto tarvitaan (esim. aineistopäivitys), selvitetään ensin, toistuuko virhe ilman FTS-taulua, ja suljetaan yhteys ennen tiedoston poistoa tai korvaamista.
 
 **Avoimet kohdat ennen vaihetta 3:** virallisen Release 20 -paketin lataus, sen julkaisunumeron ja lisenssimaininnan tarkistus sivulta, muunnoksen ajo sillä ja vertailu fineli.fi-sivun arvoihin.
+
+**Päivitys 25.10.2026 (vaihe 3):** Kehittäjä latasi virallisen peruspaketin Release 20.0 (2019) ja tarkisti viitteen ja käyttöehdot fineli.fi-sivulta. Muunnos ja toteutus on kuvattu päätösmuistiossa 0010. Vertailu fineli.fi-sivun arvoihin jäi tekemättä. Pistokokeina Release 20:ssä esimerkiksi *Omena, kotimainen, kuorittu* on 40,5 kcal / 100 g, *Kaurapuuro, vesi, suolaa* 57,4 kcal / 100 g ja *Kananmuna, keitetty* 134 kcal / 100 g.

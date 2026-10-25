@@ -1,8 +1,10 @@
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useTheme } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
-import { db } from '@/db/client';
+import { db, sqlite } from '@/db/client';
+import { attachFineli } from '@/db/fineli';
 import migrations from '@/db/migrations/migrations';
 import { ServiceProvider } from '@/services/ServiceProvider';
 import { strings } from '@/ui/strings.fi';
@@ -16,12 +18,22 @@ export default function RootLayout() {
   );
 }
 
-/** Runs the database migrations before any screen reads data. */
+/**
+ * Runs the database migrations and attaches fineli.db before any screen reads data. If Fineli
+ * cannot be attached, the app still starts and search says Fineli is unavailable.
+ */
 function MigrationGate() {
   const { colors } = useTheme();
   const { success, error } = useMigrations(db, migrations);
+  const [fineliDone, setFineliDone] = useState(false);
 
-  if (!success) {
+  useEffect(() => {
+    attachFineli(sqlite)
+      .catch((e: unknown) => console.warn('Fineli could not be attached', e))
+      .finally(() => setFineliDone(true));
+  }, []);
+
+  if (!success || !fineliDone) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
         {error ? null : <ActivityIndicator color={colors.primary} />}
@@ -52,6 +64,7 @@ function MigrationGate() {
         <Stack.Screen name="meal-edit" options={{ title: strings.mealForm.newTitle }} />
         <Stack.Screen name="day-limit" options={{ title: strings.dayLimit.title }} />
         <Stack.Screen name="settings" options={{ title: strings.settings.title }} />
+        <Stack.Screen name="sources" options={{ title: strings.sources.title }} />
       </Stack>
     </ServiceProvider>
   );

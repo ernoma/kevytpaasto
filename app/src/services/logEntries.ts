@@ -7,11 +7,13 @@ import {
   type EnergyData,
   type PortionInput,
   type PortionUnit,
+  type Serving,
 } from '@/domain/portion';
 
 import type { ServiceContext } from './context';
 import { timestamp } from './context';
 import { ServiceError } from './errors';
+import { ensureFineliFood } from './fineli';
 import { foodEnergy, requireActiveFood } from './foods';
 import { requireActiveMeal } from './meals';
 
@@ -210,6 +212,69 @@ export function saveFoodEntry(ctx: ServiceContext, input: FoodEntryInput): LogEn
         servingAmount: source.servingAmount,
         servingUnit: source.servingUnit,
         servingLabel: source.servingLabel,
+        kcal,
+        originType: 'food',
+        originId: source.id,
+      })
+      .returning()
+      .get();
+  });
+}
+
+export interface FineliEntryInput {
+  /** UUID created when the form opened (KIR-07). */
+  id: string;
+  fastDayId: string;
+  fineliId: number;
+  amount: number;
+  unit: 'g' | 'serving';
+  /** The household unit chosen in the form, in grams; required when unit is serving. */
+  serving: Serving | null;
+  /** Serving stored with the food copy, e.g. a medium portion (OMA-02). */
+  defaultServing: Serving | null;
+}
+
+/**
+ * Logs an amount of a Fineli food (HAK-02, KIR-03). The food is copied to the food table on
+ * the first entry (source = fineli) and the entry is a snapshot of it with the chosen serving,
+ * so later Fineli releases do not affect it (KIR-08). Saving is idempotent by the form's UUID
+ * (KIR-07).
+ */
+export function saveFineliEntry(ctx: ServiceContext, input: FineliEntryInput): LogEntry {
+  requireEntryId(input.id);
+  return ctx.db.transaction((tx) => {
+    const txCtx = { ...ctx, db: tx };
+    const existing = getEntry(txCtx, input.id);
+    if (existing) {
+      requireOrigin(existing, 'food');
+      return updateFoodEntry(txCtx, input.id, { amount: input.amount, unit: input.unit });
+    }
+    requireFastDay(txCtx, input.fastDayId);
+    const source = ensureFineliFood(txCtx, input.fineliId, input.defaultServing);
+    const serving = input.unit === 'serving' ? input.serving : null;
+    const kcal = kcalOrThrow({
+      energyKcal: source.energyKcal,
+      basis: source.energyBasis,
+      serving,
+      amount: input.amount,
+      unit: input.unit,
+    });
+    const now = timestamp(ctx);
+    return tx
+      .insert(logEntry)
+      .values({
+        id: input.id,
+        fastDayId: input.fastDayId,
+        createdAt: now,
+        updatedAt: now,
+        name: source.name,
+        amount: input.amount,
+        unit: input.unit,
+        energyKcalPerBasis: source.energyKcal,
+        energyBasis: source.energyBasis,
+        servingAmount: serving?.amount ?? null,
+        servingUnit: serving?.amount != null ? 'g' : null,
+        servingLabel: serving?.label ?? null,
         kcal,
         originType: 'food',
         originId: source.id,

@@ -1,6 +1,9 @@
 import { isNonNegativeNumber } from './amount';
 import type { EnergyBasis, ServingUnit } from './portion';
 
+/** Raw or cooked, prepared or unprepared, when the source tells (LAS-06). */
+export type PreparationState = 'raw' | 'cooked' | 'prepared' | 'unprepared';
+
 /** The user's own food or product (OMA-01, OMA-02). */
 export interface FoodInput {
   name: string;

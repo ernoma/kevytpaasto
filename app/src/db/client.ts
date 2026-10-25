@@ -5,7 +5,7 @@ import * as schema from './schema';
 
 const DATABASE_NAME = 'kevytpaasto.db';
 
-const sqlite = openDatabaseSync(DATABASE_NAME);
+export const sqlite = openDatabaseSync(DATABASE_NAME);
 sqlite.execSync('PRAGMA foreign_keys = ON;');
 
 export const db = drizzle(sqlite, { schema });

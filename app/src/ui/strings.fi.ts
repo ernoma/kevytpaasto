@@ -122,6 +122,57 @@ export const strings = {
     noMeals: 'Ei vielä aterioita.',
     manageFoods: 'Omat ruoat ja ateriat',
     rowLabel: (name: string, detail: string) => `${name}, ${detail}. Valitse määrä`,
+    // Local search of own foods and Fineli (HAK-02, HAK-03, HAK-04).
+    searchLabel: 'Hae ruokaa',
+    searchPlaceholder: 'Esimerkiksi kaurapuuro',
+    searchHint: 'Haku toimii myös ilman verkkoyhteyttä.',
+    ownResultsTitle: 'Omat ruoat',
+    fineliResultsTitle: 'Fineli',
+    noResults: 'Ei osumia.',
+    fineliUnavailable: 'Fineli-aineisto ei ole käytettävissä. Omat ruoat löytyvät silti.',
+    sourceOwn: 'Oma ruoka',
+    sourceFineli: 'Fineli',
+    resultDetail: (energy: string, source: string, process: string | null) =>
+      process ? `${energy} · ${source} · ${process}` : `${energy} · ${source}`,
+    // Attribution next to the results (CC BY 4.0, TIE-03).
+    fineliAttribution: 'Fineli-tiedot: Terveyden ja hyvinvoinnin laitos (THL), CC BY 4.0.',
+  },
+  // Fineli household units (foodaddunit.csv) offered as servings.
+  fineliUnits: {
+    KPL_S: 'pieni kpl',
+    KPL_M: 'keskikokoinen kpl',
+    KPL_L: 'iso kpl',
+    KPL_VALM: 'kpl (valmistajan koko)',
+    PORTS: 'pieni annos',
+    PORTM: 'keskikokoinen annos',
+    PORTL: 'iso annos',
+    DL: 'dl',
+    RKL: 'rkl',
+    TL: 'tl',
+  },
+  // Data sources and licences (TIE-03). The Fineli citation follows THL's recommendation.
+  sources: {
+    title: 'Tietolähteet',
+    fineliTitle: 'Fineli',
+    fineliCitation: (release: string, year: string) =>
+      `Terveyden ja hyvinvoinnin laitos (THL), Kansanterveyden edistäminen -yksikkö. Fineli. Elintarvikkeiden koostumustietokanta. Versio ${release}. Helsinki ${year}. www.fineli.fi`,
+    fineliLicense: 'Käyttöehdot: Creative Commons Nimeä 4.0 (CC BY 4.0).',
+    fineliChanges:
+      'Sovellus käyttää aineistosta elintarvikkeiden nimiä, energiasisältöä, valmistustapaa ja ruokamittoja. Energia on muunnettu kilojouleista kilokaloreiksi jakamalla luvulla 4,184, ja isoin kirjaimin kirjoitetut nimet näytetään pienin kirjaimin.',
+    fineliDisclaimer:
+      'THL ei vastaa tiedoissa mahdollisesti esiintyvistä virheistä. Tietojen tulkinta ja niistä tehtävät johtopäätökset ovat käyttäjän omalla vastuulla.',
+    fineliNotEndorsed:
+      'Kevytpaasto ei ole Terveyden ja hyvinvoinnin laitoksen tuottama tai suosittelema palvelu eikä osa Finelin verkkopalvelua. Fineli on Terveyden ja hyvinvoinnin laitoksen rekisteröity tavaramerkki.',
+    fineliBundled: (count: string) => `Sovelluksen mukana on ${count} elintarvikkeen tiedot.`,
+    fineliLogged:
+      'Kirjattu Fineli-ruoka tallennetaan kirjaushetken tietoina, joten aineiston myöhemmät versiot eivät muuta aiempia kirjauksia.',
+    openFineli: 'Avaa fineli.fi',
+    openLicense: 'Lue lisenssi (CC BY 4.0)',
+    fineliUrl: 'https://fineli.fi/fineli/fi/avoin-data',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.fi',
+    appTitle: 'Sovellus',
+    appLicense:
+      'Kevytpaasto on avointa lähdekoodia (GPL-3.0-or-later). Se on maksuton, eikä siinä ole mainontaa tai analytiikkaa.',
   },
   // Amount view (KIR-03, KIR-04, OMA-05).
   portion: {
@@ -141,6 +192,9 @@ export const strings = {
     wholeMeal: (kcal: string) => `Koko ateria ${kcal} kcal`,
     sourceFood: 'Lähde: oma ruoka',
     sourceMeal: 'Lähde: oma ateria, laskettu osista',
+    // LAS-06: show which data the calculation uses.
+    sourceFineli: (process: string | null) =>
+      `Lähde: Fineli (THL).${process ? ` Valmistustapa: ${process.toLocaleLowerCase('fi')}.` : ''} Energia 100 g:aa syötävää osaa kohden.`,
     total: (kcal: string) => `Yhteensä ${kcal} kcal`,
     totalUnknown: 'Kaloreita ei voi vielä laskea.',
     save: 'Lisää kirjaus',
@@ -259,6 +313,7 @@ export const strings = {
     todayLimitKeep: 'Vain uudet päivät',
     todayLimitUpdate: 'Myös tänään',
     foodsLink: 'Omat ruoat ja ateriat',
+    sourcesLink: 'Tietolähteet ja lisenssit',
     devTitle: 'Kehitys',
     barcodeExperimentLink: 'Kokeilu: viivakoodin luku',
     ftsExperimentLink: 'Kokeilu: tekstihaku (FTS5)',

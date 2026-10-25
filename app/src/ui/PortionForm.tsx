@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { normalizeText } from '@/domain/food';
 import { formatAmountInput, formatKcal } from '@/domain/format';
-import { allowedUnits, type EnergyData, type PortionUnit } from '@/domain/portion';
+import { allowedUnits, type EnergyData, type PortionUnit, type Serving } from '@/domain/portion';
 import { evaluatePortion } from '@/domain/portionForm';
 
 import { Button } from './Button';
@@ -15,11 +15,23 @@ import { TextField } from './TextField';
 
 const t = strings.portion;
 
+function servingValue(key: string): string {
+  return `serving-${key}`;
+}
+
 export interface PortionValues {
   amount: number;
   unit: PortionUnit;
+  /** The chosen serving when the form offers several (servingChoices). */
+  serving?: Serving | null;
   /** Only when the name can be edited (KIR-05). */
   name?: string;
+}
+
+/** One of several servings to choose from, e.g. Fineli's medium portion or decilitre. */
+export interface ServingChoice {
+  key: string;
+  serving: Serving;
 }
 
 interface PortionFormProps {
@@ -27,8 +39,10 @@ interface PortionFormProps {
   kind: 'food' | 'meal';
   /** For a meal: the whole meal's energy per serving. */
   energy: EnergyData;
+  /** Replaces energy.serving with a choice of servings. */
+  servingChoices?: readonly ServingChoice[];
   sourceText: string;
-  initial: { unit: PortionUnit; amount: number | null; name?: string };
+  initial: { unit: PortionUnit; amount: number | null; name?: string; servingKey?: string };
   /** Shows a name field when an existing entry is corrected (KIR-05). */
   editName?: boolean;
   saveLabel: string;
@@ -43,7 +57,8 @@ interface PortionFormProps {
  */
 export function PortionForm({
   kind,
-  energy,
+  energy: baseEnergy,
+  servingChoices,
   sourceText,
   initial,
   editName = false,
@@ -51,8 +66,30 @@ export function PortionForm({
   onSave,
 }: PortionFormProps) {
   const { colors } = useTheme();
-  const units = kind === 'meal' ? (['serving'] as PortionUnit[]) : allowedUnits(energy);
-  const [unit, setUnit] = useState<PortionUnit>(initial.unit);
+  // A choice is a plain unit or "serving-<key>" when several servings are offered.
+  const [choice, setChoice] = useState<string>(
+    initial.servingKey !== undefined ? servingValue(initial.servingKey) : initial.unit,
+  );
+  const chosenServing = servingChoices?.find((s) => servingValue(s.key) === choice)?.serving;
+  const energy: EnergyData = servingChoices
+    ? { ...baseEnergy, serving: chosenServing ?? null }
+    : baseEnergy;
+  const unit: PortionUnit = chosenServing ? 'serving' : (choice as PortionUnit);
+  const choices = servingChoices
+    ? [
+        ...allowedUnits({ ...baseEnergy, serving: null }).map((value) => ({
+          value: value as string,
+          label: unitLabel(value, null),
+        })),
+        ...servingChoices.map((s) => ({
+          value: servingValue(s.key),
+          label: unitLabel('serving', s.serving),
+        })),
+      ]
+    : (kind === 'meal' ? (['serving'] as PortionUnit[]) : allowedUnits(energy)).map((value) => ({
+        value: value as string,
+        label: unitLabel(value, energy.serving),
+      }));
   const [amountText, setAmountText] = useState(
     initial.amount === null ? '' : formatAmountInput(initial.amount),
   );
@@ -78,7 +115,12 @@ export function PortionForm({
     savingRef.current = true;
     setSaving(true);
     try {
-      onSave({ amount: result.amount, unit, ...(editName ? { name } : {}) });
+      onSave({
+        amount: result.amount,
+        unit,
+        ...(servingChoices ? { serving: chosenServing ?? null } : {}),
+        ...(editName ? { name } : {}),
+      });
     } catch {
       setSaveError(strings.saveFailed);
       savingRef.current = false;
@@ -113,12 +155,12 @@ export function PortionForm({
         </Text>
         <Text style={[styles.source, { color: colors.text }]}>{sourceText}</Text>
       </View>
-      {kind === 'food' && units.length > 0 ? (
+      {kind === 'food' && choices.length > 0 ? (
         <ChoiceChips
           label={t.unitLabel}
-          choices={units.map((value) => ({ value, label: unitLabel(value, energy.serving) }))}
-          selected={unit}
-          onSelect={setUnit}
+          choices={choices}
+          selected={choice}
+          onSelect={setChoice}
           testID="unit"
         />
       ) : null}

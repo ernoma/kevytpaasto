@@ -36,7 +36,7 @@ yarn-error.*
 proxy/.wrangler/
 proxy/.experiments/
 
-# Fineli source data downloaded by scripts (the built fineli.db is committed later in phase 3)
+# Fineli source packages downloaded by hand (the built app/assets/fineli/fineli.db is committed)
 scripts/fineli/data/
 
 # Test and coverage output

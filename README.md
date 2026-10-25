@@ -18,10 +18,10 @@ Sovellus avautuu puhelimen Expo Go -sovelluksessa (SDK 58) tai development build
 
 ## Tietolähteet
 
-- **Fineli**, Terveyden ja hyvinvoinnin laitos (THL): elintarvikkeiden koostumustietokanta, lisenssi CC BY 4.0.
+- **Fineli**: Terveyden ja hyvinvoinnin laitos (THL), Kansanterveyden edistäminen -yksikkö. Fineli. Elintarvikkeiden koostumustietokanta. Versio 20. Helsinki 2019. https://www.fineli.fi. Käyttöehdot: [Creative Commons Nimeä 4.0 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fi). Sovelluksen mukana oleva `app/assets/fineli/fineli.db` on muunnettu aineistosta: energia kJ → kcal, nimet pienin kirjaimin, mukana vain nimi, energia, valmistustapa ja ruokamitat. Muunnos: `npm run fineli:convert -w scripts -- <paketti.zip> --year 2019`, ks. [docs/adr/0010-fineli-aineisto-ja-haku.md](docs/adr/0010-fineli-aineisto-ja-haku.md). THL ei vastaa tiedoissa mahdollisesti esiintyvistä virheistä. Fineli on THL:n rekisteröity tavaramerkki.
 - **Open Food Facts**: tietokanta ODbL, sisältö Database Contents License, kuvat CC BY-SA.
 
-Sovellus ei ole THL:n eikä Open Food Factsin palvelu.
+Sovellus ei ole THL:n eikä Open Food Factsin tuottama tai suosittelema palvelu.
 
 ## Lisenssi
 

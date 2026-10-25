@@ -1,0 +1,105 @@
+# Acceptance criterion 4 (Fineli part): an ordinary ingredient is found by a local Fineli search
+# and logged; the source, energy basis and preparation method are shown (HAK-02, HAK-03, LAS-06).
+# A food without energy says so and cannot be logged (HAK-04). The data sources view shows the
+# Fineli citation and licence (TIE-03). Run also in airplane mode: the search needs no network.
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '600'
+- tapOn:
+    id: 'start-fast-day'
+- tapOn:
+    id: 'add-entry'
+
+# HAK-02, HAK-03, LAS-06: the result shows energy per 100 g, the source and preparation method.
+- tapOn:
+    id: 'food-search'
+- inputText: 'kaurapuuro'
+- hideKeyboard
+- assertVisible: 'Fineli'
+- assertVisible: 'Kaurapuuro, vesi, suolaa'
+- assertVisible: '57,4 kcal / 100 g · Fineli · Keitetty'
+- takeScreenshot: fineli-search
+# Up to 30 results: allow time for enlarged text (LAA-06).
+- scrollUntilVisible:
+    element: 'Fineli-tiedot: Terveyden ja hyvinvoinnin laitos \(THL\), CC BY 4.0.'
+    timeout: 90000
+- takeScreenshot: fineli-search-end
+- scrollUntilVisible:
+    element:
+      id: 'fineli-1513'
+    direction: UP
+    timeout: 90000
+- tapOn:
+    id: 'fineli-1513'
+
+# KIR-03, KIR-04: Fineli's medium portion is preselected; household units are offered in grams.
+- assertVisible: 'Lähde: Fineli \(THL\). Valmistustapa: keitetty. Energia 100 g:aa syötävää osaa kohden.'
+- assertVisible: '57,4 kcal / 100 g'
+- takeScreenshot: fineli-portion
+# Scrolling keeps the flow working with enlarged text (LAA-06).
+- scrollUntilVisible:
+    element: 'Yhteensä 132 kcal'
+- scrollUntilVisible:
+    element:
+      id: 'unit-serving-DL'
+    direction: UP
+- tapOn:
+    id: 'unit-serving-DL'
+- scrollUntilVisible:
+    element: 'Yhteensä 57 kcal'
+- tapOn:
+    id: 'amount-input'
+- eraseText
+- inputText: '2'
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Yhteensä 115 kcal'
+- scrollUntilVisible:
+    element:
+      id: 'save-portion'
+- tapOn:
+    id: 'save-portion'
+- assertVisible: 'Jäljellä 485 kcal'
+- assertVisible: 'Kaurapuuro, vesi, suolaa'
+- takeScreenshot: fineli-logged
+
+# KIR-08: the entry keeps the chosen household unit as a snapshot.
+- tapOn: 'Kaurapuuro, vesi, suolaa, .*Muokkaa kirjausta'
+- assertVisible: 'Kirjaushetken tiedot.*'
+- scrollUntilVisible:
+    element: '.*dl \(100 g\).*'
+- pressKey: back
+
+# HAK-04: missing energy is shown before logging and is never treated as 0.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'food-search'
+- inputText: 'kaneli'
+- hideKeyboard
+- assertVisible: 'Energiatieto puuttuu · Fineli.*'
+- takeScreenshot: fineli-missing-energy
+- tapOn: 'Kaneli, .*Valitse määrä'
+- assertVisible: 'Tätä ei voi kirjata, koska energiatieto puuttuu.'
+- pressKey: back
+- pressKey: back
+
+# TIE-03: the Fineli citation and licence are available in the app.
+# Tap the left part of the header button: Expo Go's own menu button covers its right edge.
+- tapOn:
+    id: 'open-settings'
+    point: '20%,50%'
+- scrollUntilVisible:
+    element:
+      id: 'sources-link'
+- tapOn:
+    id: 'sources-link'
+- assertVisible: '.*Fineli. Elintarvikkeiden koostumustietokanta. Versio 20.0. Helsinki 2019.*'
+- assertVisible: 'Käyttöehdot: Creative Commons Nimeä 4.0 \(CC BY 4.0\).'
+- scrollUntilVisible:
+    element: '.*ei ole Terveyden ja hyvinvoinnin laitoksen tuottama tai suosittelema.*'
+- takeScreenshot: sources

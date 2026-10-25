@@ -18,7 +18,7 @@ const DEFAULT_TERMS = [
 ];
 
 const [dbArg, ...terms] = process.argv.slice(2);
-const db = new Database(resolve(dbArg ?? 'scripts/fineli/data/fineli.db'), { readonly: true });
+const db = new Database(resolve(dbArg ?? 'app/assets/fineli/fineli.db'), { readonly: true });
 
 for (const row of db.prepare('SELECT key, value FROM meta').all() as {
   key: string;
