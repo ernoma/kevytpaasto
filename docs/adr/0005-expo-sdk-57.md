@@ -1,7 +1,7 @@
 # 0005 – Expo SDK 57 SDK 58:n sijaan
 
 Päiväys: 18.10.2026  
-Tila: hyväksytty  
+Tila: korvattu muistiolla [0008](0008-expo-sdk-58.md) (paluu SDK 58:aan)  
 Korvaa osittain: [0001](0001-projektipohja.md) (SDK-versio)
 
 ## Tausta

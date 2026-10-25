@@ -1,7 +1,7 @@
 # 0001 – Projektipohja ja työkaluversiot
 
 Päiväys: 18.10.2026  
-Tila: hyväksytty; SDK-versio korvattu muistiolla [0005](0005-expo-sdk-57.md) (Expo SDK 57)  
+Tila: hyväksytty; SDK-versio vaihdettiin muistiolla [0005](0005-expo-sdk-57.md) SDK 57:ään ja palautettiin muistiolla [0008](0008-expo-sdk-58.md) SDK 58:aan  
 Liittyy: toteutussuunnitelman vaihe 0, luvut 2.1, 3 ja 9
 
 ## Tausta

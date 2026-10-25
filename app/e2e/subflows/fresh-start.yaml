@@ -2,7 +2,12 @@
 # Every flow that needs an empty state starts with this.
 appId: host.exp.exponent
 ---
-- clearState
+# Clearing the data also revokes Expo Go's local network permission (Android 17), without which
+# Expo Go cannot reach Metro at 10.0.2.2. launchApp grants it again (docs/adr/0008).
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
 - runFlow: open-app.yaml
 - extendedWaitUntil:
     visible: 'Tervetuloa'

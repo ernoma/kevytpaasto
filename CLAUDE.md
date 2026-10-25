@@ -21,7 +21,7 @@ Lue toteutussuunnitelman asiaankuuluva osa ennen työn aloittamista. Jos tehtäv
 
 ## Komennot
 
-Vaatii Node.js 22.13+ (Expo SDK 57, ks. `docs/adr/0005-expo-sdk-57.md`). Riippuvuudet asennetaan juuressa: `npm install`.
+Vaatii Node.js 22.13+ (Expo SDK 58, ks. `docs/adr/0008-expo-sdk-58.md`). Riippuvuudet asennetaan juuressa: `npm install`.
 
 Juuressa:
 
@@ -36,7 +36,7 @@ Juuressa:
 
 Hakemistossa `app/`:
 
-- `npx expo start` – kehityspalvelin; puhelimessa Expo Go (SDK 57) tai development build
+- `npx expo start` – kehityspalvelin; puhelimessa Expo Go (SDK 58) tai development build
 - `npx expo install <paketti>` – Expo-riippuvuudet aina tällä, ei `npm install`
 - `npm run db:generate` – uusi Drizzle-migraatio `src/db/schema.ts`:n muutoksista (`src/db/migrations/`)
 - `npx vitest run tests/domain` – yksittäinen testihakemisto

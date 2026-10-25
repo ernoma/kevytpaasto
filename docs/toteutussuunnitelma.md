@@ -282,6 +282,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.7 / 25.10.2026:** Paluu Expo SDK 58:aan (React Native 0.88, React 19.3), koska kehittäjän puhelimen Expo Go on päivittynyt eikä enää avaa SDK 57 -projektia (päätösmuistio 0008).
 - **0.6 / 25.10.2026:** Vaihe 1b: Asetukset-näkymästä toteutettiin vaiheessa 1 oletusraja (KAY-03), ja yksittäisen päivän rajaa voi muuttaa Tänään-näkymästä. Kirjauksen voi siirtää vain jo olemassa olevalle paastopäivälle; muiden päivien aloitus tulee historian myötä (vaihe 5). UUID-tunnisteet luodaan `expo-crypto`-paketilla, koska Expo SDK 57:n ajoympäristössä ei ole globaalia `crypto.randomUUID`-funktiota.
 - **0.5 / 25.10.2026:** Käyttöliittymän todennus siirretty pääosin Android-emulaattoriin ja Maestroon (`npm run emulator`, `npm run e2e`, `npm run device`). Puhelimelle jää kamera, tuntuma ja ruudunlukija (päätösmuistio 0007).
 - **0.4 / 25.10.2026:** Vaatimusmäärittelyn 0.3 mukaisesti luovuttu ansainnasta ja `entitlements`-rajapinnasta. Projekti on avointa lähdekoodia GPL-3.0-or-later-lisenssillä; lisätty luku 10 avoimuudesta, riskit julkisesta reposta ja suljetuista riippuvuuksista (päätösmuistio 0006).
