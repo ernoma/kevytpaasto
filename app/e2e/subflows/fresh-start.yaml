@@ -1,0 +1,9 @@
+# Shared subflow: clears Expo Go's data, including the app's database, and opens the app.
+# Every flow that needs an empty state starts with this.
+appId: host.exp.exponent
+---
+- clearState
+- runFlow: open-app.yaml
+- extendedWaitUntil:
+    visible: 'Tervetuloa'
+    timeout: 60000

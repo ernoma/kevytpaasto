@@ -4,7 +4,7 @@ appId: host.exp.exponent
 ---
 - openLink: exp://10.0.2.2:8081
 - extendedWaitUntil:
-    visible: 'Sovelluksen pohja toimii.*|Go home|Continue'
+    visible: 'Tervetuloa|Tavallinen päivä|Tänään|Go home|Continue'
     timeout: 180000
 # First launch shows an introduction; continuing opens the full developer menu.
 - tapOn:

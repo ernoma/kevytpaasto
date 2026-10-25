@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.5  
+Versio: 0.6  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -282,6 +282,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.6 / 25.10.2026:** Vaihe 1b: Asetukset-näkymästä toteutettiin vaiheessa 1 oletusraja (KAY-03), ja yksittäisen päivän rajaa voi muuttaa Tänään-näkymästä. Kirjauksen voi siirtää vain jo olemassa olevalle paastopäivälle; muiden päivien aloitus tulee historian myötä (vaihe 5). UUID-tunnisteet luodaan `expo-crypto`-paketilla, koska Expo SDK 57:n ajoympäristössä ei ole globaalia `crypto.randomUUID`-funktiota.
 - **0.5 / 25.10.2026:** Käyttöliittymän todennus siirretty pääosin Android-emulaattoriin ja Maestroon (`npm run emulator`, `npm run e2e`, `npm run device`). Puhelimelle jää kamera, tuntuma ja ruudunlukija (päätösmuistio 0007).
 - **0.4 / 25.10.2026:** Vaatimusmäärittelyn 0.3 mukaisesti luovuttu ansainnasta ja `entitlements`-rajapinnasta. Projekti on avointa lähdekoodia GPL-3.0-or-later-lisenssillä; lisätty luku 10 avoimuudesta, riskit julkisesta reposta ja suljetuista riippuvuuksista (päätösmuistio 0006).
 - **0.3 / 18.10.2026:** Expo SDK 57 SDK 58:n sijaan, jotta sovellus avautuu kehittäjän puhelimen Expo Go -versiossa (päätösmuistio 0005).

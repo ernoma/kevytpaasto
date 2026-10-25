@@ -1,0 +1,37 @@
+# Acceptance criterion 12: an ordinary day is not marked as failed or incomplete because it is
+# not a fast day and has no entries (PAI-04, LAA-08). Also PAI-01 and PAI-06 for an empty day.
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '500'
+# PAI-04: no request to log food on a non-fast day, and no judgemental wording.
+- assertVisible: 'Tavallinen päivä'
+- assertVisible: 'Aloita paastopäivä'
+- assertNotVisible: 'Lisää kirjaus'
+- assertNotVisible: '.*(Ei kirjauksia|puuttu|epäonnist|unohd|Muista).*'
+- takeScreenshot: non-fast-day
+# KAY-03: the default limit can be changed in settings and applies to new fast days.
+# Tap the left part of the header button: Expo Go's own menu button covers its right edge.
+- tapOn:
+    id: 'open-settings'
+    point: '20%,50%'
+- tapOn:
+    id: 'limit-input'
+- eraseText
+- inputText: '450'
+- tapOn:
+    id: 'limit-submit'
+- assertVisible: 'Tallennettu.'
+- takeScreenshot: settings
+- pressKey: back
+# PAI-01: a fast day can be started, and PAI-06: removed again after confirmation.
+- tapOn:
+    id: 'start-fast-day'
+- assertVisible: 'Jäljellä 450 kcal'
+- tapOn: 'Poista paastopäivä'
+- assertVisible: 'Poistetaanko paastopäivä\?'
+- tapOn: 'Poista|POISTA'
+- assertVisible: 'Tavallinen päivä'

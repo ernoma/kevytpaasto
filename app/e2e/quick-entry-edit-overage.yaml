@@ -1,0 +1,76 @@
+# Acceptance criterion 3: changing or deleting an entry updates the sum, and the limit can be
+# exceeded without blocking logging (KIR-02, KIR-05, PAI-02, PAI-03, PAI-06, KAY-03, LAS-03,
+# LAS-05, LAA-06, LAA-08).
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '500'
+- tapOn:
+    id: 'start-fast-day'
+- assertVisible: 'Jäljellä 500 kcal'
+
+# KIR-02: a quick entry with a name and a decimal comma (LAS-05).
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'kcal-input'
+- inputText: '120,5'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Omena'
+- tapOn:
+    id: 'save-entry'
+# 500 − 120.5 = 379.5, rounded only for display (LAS-03).
+- assertVisible: 'Jäljellä 380 kcal'
+
+# KIR-02: energy alone is enough; PAI-03: the limit can be exceeded.
+- tapOn:
+    id: 'add-entry'
+- tapOn:
+    id: 'kcal-input'
+- inputText: '400'
+- tapOn:
+    id: 'save-entry'
+- assertVisible: 'Ylitys 21 kcal'
+- takeScreenshot: overage
+
+# KIR-05: correcting the energy updates the sum: 50 + 400 = 450.
+- tapOn: 'Omena.*'
+- assertVisible: 'Muita paastopäiviä ei ole.'
+- takeScreenshot: edit-entry
+- tapOn:
+    id: 'kcal-input'
+- eraseText
+- inputText: '50'
+- tapOn:
+    id: 'save-entry'
+- assertVisible: 'Jäljellä 50 kcal'
+
+# KIR-05: deleting an entry updates the sum.
+- tapOn: 'Pikakirjaus.*'
+- tapOn: 'Poista kirjaus'
+- tapOn: 'Poista|POISTA'
+- assertVisible: 'Jäljellä 450 kcal'
+- assertNotVisible: 'Pikakirjaus.*'
+- takeScreenshot: after-edit-delete
+
+# KAY-03: the day's own limit can be changed.
+- tapOn: 'Muuta päivän rajaa'
+- tapOn:
+    id: 'limit-input'
+- eraseText
+- inputText: '600'
+- tapOn:
+    id: 'limit-submit'
+- assertVisible: 'Jäljellä 550 kcal'
+
+# PAI-06: a day with entries is deleted only after a second, separate confirmation.
+- tapOn: 'Poista paastopäivä'
+- tapOn: 'Poista|POISTA'
+- assertVisible: 'Poistetaanko myös kirjaukset\?'
+- takeScreenshot: delete-day-confirm
+- tapOn: 'Poista päivä ja kirjaukset|POISTA PÄIVÄ JA KIRJAUKSET'
+- assertVisible: 'Tavallinen päivä'

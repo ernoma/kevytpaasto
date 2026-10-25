@@ -1,12 +1,17 @@
 // Locates the Android SDK tools and Maestro for the emulator scripts (docs/adr/0007).
 //
 // ANDROID_HOME (or ANDROID_SDK_ROOT) overrides the SDK location, MAESTRO_BIN the Maestro launcher.
+// Both can also be set in a git-ignored .env file in the repo root (see .env.example).
 import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const isWindows = process.platform === 'win32';
+
+// The scripts run from the repo root (npm run). Variables already set in the shell win.
+const envFile = resolve('.env');
+if (existsSync(envFile)) process.loadEnvFile(envFile);
 
 function defaultSdkDir(): string {
   if (isWindows) return join(process.env.LOCALAPPDATA ?? homedir(), 'Android', 'Sdk');
@@ -49,7 +54,7 @@ export function toolEnv(): NodeJS.ProcessEnv {
   };
 }
 
-export function run(command: string, args: string[], options: SpawnSyncOptions = {}): string {
+function spawn(command: string, args: string[], options: SpawnSyncOptions) {
   // .bat launchers need a shell on Windows; the shell does not quote paths with spaces itself.
   const shell = isWindows && command.endsWith('.bat');
   const quote = (s: string) => (shell && /\s/.test(s) ? `"${s}"` : s);
@@ -60,11 +65,21 @@ export function run(command: string, args: string[], options: SpawnSyncOptions =
     ...options,
   });
   if (result.error) throw result.error;
+  return result;
+}
+
+export function run(command: string, args: string[], options: SpawnSyncOptions = {}): string {
+  const result = spawn(command, args, options);
   if (result.status !== 0 && options.stdio !== 'inherit') {
     throw new Error(`${command} ${args.join(' ')} failed:\n${String(result.stderr)}`);
   }
   if (result.status !== 0) process.exit(result.status ?? 1);
   return String(result.stdout ?? '');
+}
+
+/** Runs a command with inherited output and returns its exit status instead of exiting. */
+export function runInherited(command: string, args: string[], options: SpawnSyncOptions = {}) {
+  return spawn(command, args, { ...options, stdio: 'inherit' }).status ?? 1;
 }
 
 export function adb(...args: string[]): string {

@@ -1,0 +1,26 @@
+# Acceptance criterion 1: a new user sets a calorie limit and reaches the day view without
+# personal details, an account, payment details or a trial (KAY-01, LAS-05).
+appId: host.exp.exponent
+---
+- runFlow: subflows/fresh-start.yaml
+# KAY-01: the calorie limit is the only question.
+- assertVisible: 'Paastopäivän kaloriraja \(kcal\)'
+- assertNotVisible: '.*(Ikä|Paino|Pituus|Sukupuoli|Sähköposti|Salasana|Kirjaudu|Tili|Maksu|Kokeilujakso).*'
+- takeScreenshot: onboarding-start
+# The limit must be greater than zero; the error is shown as text.
+- tapOn:
+    id: 'limit-input'
+- inputText: '0'
+- tapOn:
+    id: 'limit-submit'
+- assertVisible: '.*Rajan on oltava suurempi kuin nolla.'
+- takeScreenshot: onboarding-error
+- tapOn:
+    id: 'limit-input'
+- eraseText
+- runFlow:
+    file: subflows/complete-onboarding.yaml
+    env:
+      LIMIT: '500'
+- assertVisible: 'Aloita paastopäivä'
+- takeScreenshot: onboarding-done

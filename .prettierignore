@@ -5,3 +5,4 @@ coverage/
 package-lock.json
 app/src/db/migrations/
 *.md
+app/e2e/output/

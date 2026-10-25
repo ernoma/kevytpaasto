@@ -1,0 +1,11 @@
+# Shared subflow: sets the calorie limit ${LIMIT} in onboarding (KAY-01).
+appId: host.exp.exponent
+---
+- tapOn:
+    id: 'limit-input'
+- inputText: ${LIMIT}
+- tapOn:
+    id: 'limit-submit'
+- extendedWaitUntil:
+    visible: 'Tavallinen päivä'
+    timeout: 10000

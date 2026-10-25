@@ -18,6 +18,10 @@ Vaiheessa 0 kaikki käyttöliittymän tarkistukset tehtiin kehittäjän puhelime
   - `npm run device -- screenshot|font <koko>|offline|online|open` tekee kuvakaappauksen ja säätää laitteen asetuksia. `font` käynnistää Expo Go:n uudelleen, koska käynnissä oleva sovellus ei huomaa muuttunutta tekstikokoa.
 - Maestro-testien yhteiset aliflow't ovat hakemistossa `app/e2e/subflows/`. Esimerkiksi `open-app.yaml` avaa sovelluksen ja sulkee Expo Go:n kehitysvalikon, jos se on auki.
 - SDK:n sijainti luetaan `ANDROID_HOME`-muuttujasta ja Maestron sijainti `MAESTRO_BIN`-muuttujasta. Kummallekin on oletussijainti. Kehittäjän koneella `ANDROID_HOME=F:\Android\Sdk` ja Maestro 2.11.0 sijaitsee kansiossa `%LOCALAPPDATA%\maestro`. Skriptit kytkevät Maestron ja Expon telemetrian pois.
+- Flow't, jotka tarvitsevat tyhjän tilan, alkavat aliflow'lla `subflows/fresh-start.yaml`. Se tyhjentää Expo Go:n tiedot (`clearState`), jolloin myös sovelluksen tietokanta tyhjenee.
+- Maestro kirjoittaa `takeScreenshot`-kuvat ajokohtaiseen hakemistoon `<tuloshakemisto>/<flow>/takeScreenshot/`. `npm run e2e` ohjaa ajon lokit hakemistoon `app/e2e/output/last-run/` (korvataan joka ajossa) ja kopioi kuvat tiedostoiksi `app/e2e/output/<nimi>.png`, myös epäonnistuneesta ajosta. Flow't käyttävät pelkkää nimeä (`takeScreenshot: overage`).
+- Paikalliset polut (`ANDROID_HOME`, `MAESTRO_BIN`) voi asettaa juuren `.env`-tiedostoon, jota ei viedä versionhallintaan (malli: `.env.example`). Komentotulkissa asetettu muuttuja voittaa.
+- Expo Go:n kehitysvalikon kelluva painike peittää näkymän oikean yläkulman. Flow't napauttavat yläpalkin painikkeita niiden vasemmasta reunasta.
 - `npm run check` ei aja Maestroa, koska se vaatii käynnissä olevan emulaattorin ja Metron. Claude ajaa `npm run e2e`:n aina, kun muutos koskee käyttöliittymää.
 
 ## Mitä puhelimella testataan edelleen
