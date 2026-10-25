@@ -1,28 +1,18 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
-import { fileURLToPath } from 'node:url';
+import type Database from 'better-sqlite3';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import * as schema from '@/db/schema';
 
-const migrationsFolder = fileURLToPath(new URL('../../src/db/migrations', import.meta.url));
-const now = '2026-10-18T08:00:00.000Z';
+import { createTestDb } from '../helpers/db';
 
-function createDb() {
-  const sqlite = new Database(':memory:');
-  sqlite.pragma('foreign_keys = ON');
-  const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder });
-  return { sqlite, db };
-}
+const now = '2026-10-18T08:00:00.000Z';
 
 describe('database migrations', () => {
   let sqlite: Database.Database;
-  let db: ReturnType<typeof createDb>['db'];
+  let db: ReturnType<typeof createTestDb>['db'];
 
   beforeEach(() => {
-    ({ sqlite, db } = createDb());
+    ({ sqlite, db } = createTestDb());
   });
 
   it('creates all tables from the implementation plan', () => {

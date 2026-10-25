@@ -8,7 +8,7 @@ Tila: **ei todennettu** | **osittain todennettu** | **todennettu**. Kun kriteeri
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Aloitus: kaloriraja asetetaan ja päivänäkymä avautuu ilman henkilötietokyselyä, tiliä, maksutietoja tai kokeilua | 1 | Maestro + manuaalinen | – | ei todennettu | – |
 | 2 | Laskenta: 80 kcal/100 g, 150 g → 120 kcal; raja 600 → jäljellä 480 | 2 | Vitest (domain) | – | ei todennettu | – |
-| 3 | Korjaus ja ylitys: muutos ja poisto päivittävät summan, rajan voi ylittää | 1 | Vitest (domain, palvelut) + manuaalinen | – | ei todennettu | – |
+| 3 | Korjaus ja ylitys: muutos ja poisto päivittävät summan, rajan voi ylittää | 1 | Vitest (domain, palvelut) + Maestro + manuaalinen | Vitest: `app/tests/services/logEntries.test.ts` › *Acceptance criterion 3* ja `app/tests/domain/daySummary.test.ts` (PAI-03). Maestro ja manuaalinen tarkistus vaiheessa 1b. | osittain todennettu | 25.10.2026, 0.1.0 |
 | 4 | Tuotehaku: merkkituote OFF-haulla tai viivakoodilla, raaka-aine Finelistä; lähde ja peruste näkyvät | 3–4 | Manuaalinen puhelimella + integraatiotestit (mockattu OFF) | – | ei todennettu | – |
 | 5 | Puuttuva tuote: lisäys, heti kirjattavissa, hyväksyntä julkaisuun; todellinen julkaisu hallitusti OFF:n testiohjeiden mukaan | 6 | Välityspalvelun testit + manuaalinen OFF-testiympäristössä | – | ei todennettu | – |
 | 6 | Julkaisun häiriö: oma kirjaus säilyy, tila näkyy, uudelleenlähetys ilman kaksoiskappaleita | 6 | Vitest (tilakone) + välityspalvelun idempotenssitesti | – | ei todennettu | – |
@@ -22,5 +22,6 @@ Tila: **ei todennettu** | **osittain todennettu** | **todennettu**. Kun kriteeri
 
 ## Muutoshistoria
 
+- **25.10.2026:** Kriteeri 3 osittain todennettu vaiheessa 1a (domain- ja palvelutestit).
 - **25.10.2026:** Kriteeri 13 päivitetty vaatimusmäärittelyn 0.3 mukaiseksi (maksuton ja avoin).
 - **18.10.2026:** Pohja luotu vaiheessa 0. Mitään kriteeriä ei ole vielä todennettu.
