@@ -24,13 +24,43 @@ appId: host.exp.exponent
 - inputText: '450'
 - tapOn:
     id: 'limit-submit'
-- assertVisible: 'Tallennettu.'
+# A clear confirmation states the new limit.
+- assertVisible: 'Tallennettu. Uusien paastopäivien raja on nyt 450 kcal.'
 - takeScreenshot: settings
 - pressKey: back
 # PAI-01: a fast day can be started, and PAI-06: removed again after confirmation.
 - tapOn:
     id: 'start-fast-day'
 - assertVisible: 'Jäljellä 450 kcal'
+# KAY-03: changing the default asks whether today's fast day changes too.
+- tapOn:
+    id: 'open-settings'
+    point: '20%,50%'
+- tapOn:
+    id: 'limit-input'
+- eraseText
+- inputText: '400'
+- tapOn:
+    id: 'limit-submit'
+- assertVisible: 'Muutetaanko myös tämän päivän raja\?'
+- takeScreenshot: settings-today-limit
+- tapOn: '(?i)vain uudet päivät'
+- pressKey: back
+- assertVisible: 'Jäljellä 450 kcal'
+- tapOn:
+    id: 'open-settings'
+    point: '20%,50%'
+- tapOn:
+    id: 'limit-input'
+- eraseText
+- inputText: '420'
+- tapOn:
+    id: 'limit-submit'
+- tapOn: '(?i)myös tänään'
+- assertVisible: 'Tallennettu. Uusien paastopäivien ja tämän päivän raja on nyt 420 kcal.'
+- takeScreenshot: settings-saved-today
+- pressKey: back
+- assertVisible: 'Jäljellä 420 kcal'
 - tapOn: 'Poista paastopäivä'
 - assertVisible: 'Poistetaanko paastopäivä\?'
 - tapOn: 'Poista|POISTA'

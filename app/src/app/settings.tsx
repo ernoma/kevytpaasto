@@ -1,12 +1,15 @@
 import { router, useTheme } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Keyboard, StyleSheet, Text, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, View } from 'react-native';
 
+import { formatKcal } from '@/domain/format';
+import { getFastDay, setFastDayLimit } from '@/services/fastDays';
 import { useServices } from '@/services/ServiceProvider';
 import { getSettings, setDefaultLimit } from '@/services/settings';
 import { Button } from '@/ui/Button';
-import { useServiceQuery } from '@/ui/hooks';
+import { useServiceQuery, useToday } from '@/ui/hooks';
 import { LimitForm } from '@/ui/LimitForm';
+import { Notice } from '@/ui/Notice';
 import { Screen } from '@/ui/Screen';
 import { strings } from '@/ui/strings.fi';
 
@@ -17,28 +20,45 @@ export default function SettingsScreen() {
   const { colors } = useTheme();
   const query = useCallback(() => getSettings(ctx), [ctx]);
   const { data: settings, refresh } = useServiceQuery(query);
-  const [saved, setSaved] = useState(false);
+  const today = useToday();
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+
+  const save = (limitKcal: number) => {
+    setDefaultLimit(ctx, limitKcal);
+    refresh();
+    Keyboard.dismiss();
+    setSavedMessage(t.saved(formatKcal(limitKcal)));
+    // KAY-03: the default applies to new fast days. Today's fast day changes only if the user
+    // chooses so; earlier days are never changed (criterion 10).
+    const day = getFastDay(ctx, today);
+    if (!day || day.limitKcal === limitKcal) return;
+    Alert.alert(
+      t.todayLimitTitle,
+      t.todayLimitMessage(formatKcal(day.limitKcal), formatKcal(limitKcal)),
+      [
+        { text: t.todayLimitKeep, style: 'cancel' },
+        {
+          text: t.todayLimitUpdate,
+          onPress: () => {
+            setFastDayLimit(ctx, day.id, limitKcal);
+            setSavedMessage(t.savedWithToday(formatKcal(limitKcal)));
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <Screen>
-      {/* KAY-03: the default applies to new fast days; existing days keep their snapshot. */}
       <LimitForm
         label={t.defaultLimitLabel}
         hint={t.defaultLimitHint}
         submitLabel={t.save}
         initial={settings.defaultLimitKcal}
-        onSave={(limitKcal) => {
-          setDefaultLimit(ctx, limitKcal);
-          refresh();
-          Keyboard.dismiss();
-          setSaved(true);
-        }}
+        onSave={save}
+        onEdit={() => setSavedMessage(null)}
       />
-      {saved ? (
-        <Text accessibilityLiveRegion="polite" style={[styles.body, { color: colors.text }]}>
-          {t.saved}
-        </Text>
-      ) : null}
+      {savedMessage ? <Notice message={savedMessage} testID="settings-saved" /> : null}
       {__DEV__ ? (
         <View style={styles.dev}>
           <Text accessibilityRole="header" style={[styles.heading, { color: colors.text }]}>

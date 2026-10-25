@@ -80,9 +80,17 @@ export const strings = {
   settings: {
     title: 'Asetukset',
     defaultLimitLabel: 'Uusien paastopäivien kaloriraja (kcal)',
-    defaultLimitHint: 'Muutos koskee uusia paastopäiviä. Jo aloitettujen päivien raja ei muutu.',
+    defaultLimitHint:
+      'Muutos koskee uusia paastopäiviä. Jos tänään on paastopäivä, voit muuttaa myös sen rajan.',
     save: 'Tallenna',
-    saved: 'Tallennettu.',
+    saved: (limit: string) => `Tallennettu. Uusien paastopäivien raja on nyt ${limit} kcal.`,
+    savedWithToday: (limit: string) =>
+      `Tallennettu. Uusien paastopäivien ja tämän päivän raja on nyt ${limit} kcal.`,
+    todayLimitTitle: 'Muutetaanko myös tämän päivän raja?',
+    todayLimitMessage: (current: string, next: string) =>
+      `Tämän päivän raja on ${current} kcal. Uusi oletusraja ${next} kcal koskee joka tapauksessa uusia paastopäiviä. Aiempien päivien rajat eivät muutu.`,
+    todayLimitKeep: 'Vain uudet päivät',
+    todayLimitUpdate: 'Myös tänään',
     devTitle: 'Kehitys',
     barcodeExperimentLink: 'Kokeilu: viivakoodin luku',
     ftsExperimentLink: 'Kokeilu: tekstihaku (FTS5)',

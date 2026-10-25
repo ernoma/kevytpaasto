@@ -15,10 +15,19 @@ interface LimitFormProps {
   hint?: string;
   autoFocus?: boolean;
   onSave: (limitKcal: number) => void;
+  /** Called when the user edits the value, e.g. to hide an earlier confirmation. */
+  onEdit?: () => void;
 }
 
 /** A calorie limit field that accepts a decimal comma (KAY-01, KAY-03, LAS-05). */
-export function LimitForm({ initial, label, submitLabel, onSave, ...field }: LimitFormProps) {
+export function LimitForm({
+  initial,
+  label,
+  submitLabel,
+  onSave,
+  onEdit,
+  ...field
+}: LimitFormProps) {
   const [text, setText] = useState(initial == null ? '' : formatAmountInput(initial));
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +50,7 @@ export function LimitForm({ initial, label, submitLabel, onSave, ...field }: Lim
         onChangeText={(value) => {
           setText(value);
           setError(null);
+          onEdit?.();
         }}
         onSubmitEditing={submit}
         returnKeyType="done"

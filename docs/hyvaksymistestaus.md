@@ -22,6 +22,7 @@ Tila: **ei todennettu** | **osittain todennettu** | **todennettu**. Kun kriteeri
 
 ## Muutoshistoria
 
+- **25.10.2026:** `app/e2e/non-fast-day.yaml` kattaa myös oletusrajan muutoksen (KAY-03): tallennuksesta näkyy selvä vahvistus uudella rajalla, ja jos tänään on paastopäivä, käyttäjältä kysytään, muutetaanko myös sen raja. Aiempien päivien rajat eivät muutu (kriteeri 10).
 - **25.10.2026:** Kriteerit 1, 3 ja 12 todennettu vaiheessa 1b Maestro-testeillä emulaattorissa (tekstikoot 1.3 ja 2.0, lentotila). Tuntuma, nopeus ja TalkBack kokeillaan puhelimella vaiheen lopussa.
 - **25.10.2026:** Kriteeri 3 osittain todennettu vaiheessa 1a (domain- ja palvelutestit).
 - **25.10.2026:** Kriteeri 13 päivitetty vaatimusmäärittelyn 0.3 mukaiseksi (maksuton ja avoin).

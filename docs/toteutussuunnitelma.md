@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.6  
+Versio: 0.8  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -205,7 +205,7 @@ Suomenkielinen, puhelimelle suunniteltu. Tekstit kootaan yhteen tiedostoon (`src
 | Omat ruoat ja ateriat | Lista, lisäys, muokkaus, suosikkimerkintä, aterian kokoaminen | OMA-01…06 |
 | Uusi tuote | Viivakoodi, nimi, merkki, energia ja peruste, kuvat, julkaisun hyväksyntä | OFF-01…07 |
 | Historia | Kalenteri tai lista paastopäivistä, päivän avaus ja kopiointi | HIS-01, HIS-02 |
-| Asetukset | Oletusraja, vienti/palautus, tietojen poisto, julkaisujen tila, tietolähteet ja lisenssit | KAY-03, HIS-03, HIS-04, OFF-07, TIE-03 |
+| Asetukset | Oletusraja (jos tänään on paastopäivä, kysytään, muutetaanko myös sen raja; tallennuksesta selvä vahvistus), vienti/palautus, tietojen poisto, julkaisujen tila, tietolähteet ja lisenssit | KAY-03, HIS-03, HIS-04, OFF-07, TIE-03 |
 
 ### 7.2 Periaatteet
 
@@ -282,6 +282,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.8 / 25.10.2026:** Oletusrajan muutos kysyy, muutetaanko myös tämän päivän paastopäivän raja; aiempien päivien rajat eivät muutu (KAY-03, kriteeri 10). Tallennuksesta näytetään selvä vahvistus.
 - **0.7 / 25.10.2026:** Paluu Expo SDK 58:aan (React Native 0.88, React 19.3), koska kehittäjän puhelimen Expo Go on päivittynyt eikä enää avaa SDK 57 -projektia (päätösmuistio 0008).
 - **0.6 / 25.10.2026:** Vaihe 1b: Asetukset-näkymästä toteutettiin vaiheessa 1 oletusraja (KAY-03), ja yksittäisen päivän rajaa voi muuttaa Tänään-näkymästä. Kirjauksen voi siirtää vain jo olemassa olevalle paastopäivälle; muiden päivien aloitus tulee historian myötä (vaihe 5). UUID-tunnisteet luodaan `expo-crypto`-paketilla, koska Expo SDK 57:n ajoympäristössä ei ole globaalia `crypto.randomUUID`-funktiota.
 - **0.5 / 25.10.2026:** Käyttöliittymän todennus siirretty pääosin Android-emulaattoriin ja Maestroon (`npm run emulator`, `npm run e2e`, `npm run device`). Puhelimelle jää kamera, tuntuma ja ruudunlukija (päätösmuistio 0007).
