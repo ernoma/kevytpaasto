@@ -1,6 +1,6 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.4  
+Versio: 0.5  
 Päiväys: 25.10.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
@@ -229,8 +229,8 @@ Ennen vaihetta 1 tehdään kevyet rautalankaluonnokset Tänään- ja Lisää-nä
 - **Yksikkötestit (Vitest):** koko `domain`-kerros. Hyväksymiskriteerit 2, 3 ja 10 kirjoitetaan testeiksi sellaisinaan.
 - **Tietokantatestit:** repositoriot ja palvelut ajetaan Node-ympäristön SQLitea vasten (better-sqlite3 samalla Drizzle-skeemalla). Kattaa vienti–palautus-kierroksen (kriteeri 11) ja migraatiot.
 - **Välityspalvelun testit:** idempotenssi, ”tuote on jo olemassa” -tapaus, virheiden käsittely, mockattu OFF.
-- **Käyttöliittymätestit (Maestro):** aloitus, kirjaus suosikista kahdella painalluksella, ylitys, uudelleenkäynnistys (kriteerit 1, 8, 9). Lisätään, kun näkymät vakiintuvat.
-- **Manuaalinen testaus omalla puhelimella:** kamera, lentotila, tekstin suurennus, ruudunlukija.
+- **Käyttöliittymätestit (Maestro, Android-emulaattori):** aloitus, kirjaus suosikista kahdella painalluksella, ylitys, uudelleenkäynnistys (kriteerit 1, 8, 9, 12). Testit ovat hakemistossa `app/e2e/` ja ajetaan komennolla `npm run e2e` emulaattorin Expo Go:ssa. Claude ajaa ne ja tarkistaa kuvakaappaukset, tekstin suurennuksen ja lentotilan emulaattorissa aina, kun käyttöliittymä muuttuu (docs/adr/0007).
+- **Manuaalinen testaus omalla puhelimella:** viivakoodin luku kameralla, tuntuma ja nopeus sekä ruudunlukija; kerran vaiheen lopussa.
 - **Staattiset tarkistukset:** TypeScript `strict`, ESLint, Prettier. `npm run check` ajaa kaikki.
 - **Hyväksymistestauksen seuranta:** `docs/hyvaksymistestaus.md` listaa kriteerit 1–13 ja kunkin todentavan testin tai manuaalisen tarkistuksen.
 
@@ -282,6 +282,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.5 / 25.10.2026:** Käyttöliittymän todennus siirretty pääosin Android-emulaattoriin ja Maestroon (`npm run emulator`, `npm run e2e`, `npm run device`). Puhelimelle jää kamera, tuntuma ja ruudunlukija (päätösmuistio 0007).
 - **0.4 / 25.10.2026:** Vaatimusmäärittelyn 0.3 mukaisesti luovuttu ansainnasta ja `entitlements`-rajapinnasta. Projekti on avointa lähdekoodia GPL-3.0-or-later-lisenssillä; lisätty luku 10 avoimuudesta, riskit julkisesta reposta ja suljetuista riippuvuuksista (päätösmuistio 0006).
 - **0.3 / 18.10.2026:** Expo SDK 57 SDK 58:n sijaan, jotta sovellus avautuu kehittäjän puhelimen Expo Go -versiossa (päätösmuistio 0005).
 - **0.2 / 18.10.2026:** Vaihe 0: [tarkistettava]-kohdat päivitetty OFF:n ja Finelin ajantasaisten ohjeiden mukaan (OFF-haun rajat ja nimihaun toteutus, API v3, sovellusmerkintä ja lisenssit, Finelin lisenssi ja lataustapa). Reitit ovat hakemistossa `app/src/app/` Expo SDK 58:n mukaisesti. Päätösmuistiot 0001–0004.

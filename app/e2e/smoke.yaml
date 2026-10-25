@@ -1,0 +1,9 @@
+﻿# Smoke test: the app opens in Expo Go on the emulator and the database migration runs.
+# Run with: npm run e2e (repo root), see docs/adr/0007-emulaattoritestaus.md
+appId: host.exp.exponent
+---
+- runFlow: subflows/open-app.yaml
+- extendedWaitUntil:
+    visible: 'Tietokanta on valmis.'
+    timeout: 30000
+- takeScreenshot: e2e/output/smoke

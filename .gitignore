@@ -47,3 +47,6 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
+
+# Crash dumps from Git Bash on Windows
+*.stackdump

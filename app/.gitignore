@@ -38,6 +38,9 @@ yarn-error.*
 
 example
 
+# Maestro screenshots and device captures
+e2e/output/
+
 # generated native folders
 /ios
 /android

@@ -1,0 +1,17 @@
+﻿# Shared subflow: opens the app in Expo Go and closes Expo Go's developer menu if it appears.
+# 10.0.2.2 is the emulator's alias for the host machine, where Metro runs (docs/adr/0007).
+appId: host.exp.exponent
+---
+- openLink: exp://10.0.2.2:8081
+- extendedWaitUntil:
+    visible: 'Sovelluksen pohja toimii.*|Go home|Continue'
+    timeout: 180000
+# First launch shows an introduction; continuing opens the full developer menu.
+- tapOn:
+    text: 'Continue'
+    optional: true
+- runFlow:
+    when:
+      visible: 'Go home'
+    commands:
+      - pressKey: back

@@ -30,6 +30,9 @@ Juuressa:
 - `npm run lint` – ESLint (sis. `src/domain/`-kerroksen tuontirajoitukset)
 - `npm run format` / `npm run format:check` – Prettier (ei muotoile Markdownia)
 - `npm test` – Vitest kaikissa työtiloissa
+- `npm run emulator` – käynnistää Android-emulaattorin ja odottaa käynnistymistä (ks. `docs/adr/0007-emulaattoritestaus.md`)
+- `npm run e2e [-- <flow>]` – Maestro-testit (`app/e2e/`) emulaattorissa; Metron on oltava käynnissä
+- `npm run device -- screenshot [nimi]` – kuvakaappaus tiedostoon `app/e2e/output/`; myös `font <koko|reset>`, `offline`, `online` ja `open`
 
 Hakemistossa `app/`:
 
@@ -83,6 +86,8 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 
 - Yksi sessio vastaa yleensä yhtä toteutussuunnitelman vaiheen osaa. Mainitse toteutetut vaatimustunnukset commit-viestissä ja testien nimissä.
 - Hyväksymiskriteereistä tehdään testit aina kun mahdollista. Päivitä `docs/hyvaksymistestaus.md`, kun kriteeri todennetaan.
-- Työ on valmis, kun `npm run check` menee läpi. Kerro erikseen, mitä pitää kokeilla puhelimella (kamera, lentotila, tekstin suurennus), koska sitä ei voi todentaa tältä koneelta.
+- Työ on valmis, kun `npm run check` menee läpi. Jos muutos koskee käyttöliittymää, todenna se myös itse emulaattorissa: käynnistä emulaattori ja Metro taustalle (`npm run emulator`, `npx expo start` hakemistossa `app/`), aja `npm run e2e`, katso kuvakaappaukset ja tarkista tekstin suurennus (`font 1.3` ja `font 2.0`) sekä lentotila (`offline`). Kehittäjää ei pyydetä kokeilemaan sitä, minkä voit todentaa emulaattorissa.
+- Puhelimella kokeiltavaksi jää vain kameralla luettava viivakoodi, tuntuma ja nopeus sekä TalkBack. Kerro ne erikseen vaiheen lopussa.
+- Uudet käyttöpolut tehdään Maestro-testeiksi hakemistoon `app/e2e/` (tiedostonimet englanniksi, vaatimustunnukset kommenttiin).
 - Kun tekninen päätös muuttuu, kirjoita lyhyt päätösmuistio hakemistoon `docs/adr/` ja päivitä toteutussuunnitelma.
 - Koodin tunnisteet, tiedostonimet ja koodikommentit ovat englanniksi. Dokumentaatio ja käyttöliittymätekstit ovat suomeksi.
