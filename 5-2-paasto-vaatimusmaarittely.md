@@ -1,7 +1,7 @@
 # 5:2-paastosovellus – vaatimusmäärittely
 
-Versio: 0.2  
-Päiväys: 18.10.2026  
+Versio: 0.3  
+Päiväys: 25.10.2026  
 Tila: keskustelun pohjalta laadittu luonnos
 
 ## 1. Tarkoitus
@@ -18,8 +18,8 @@ Keskustelussa vahvistetut lähtökohdat:
 - Ei-paastopäivien kaloriseuranta ei kuulu sovellukseen.
 - Käyttöönotossa ei ole pitkää kyselyä käyttäjän taustasta tai tavoitteista.
 - Ruokien kirjaamisen on oltava mahdollisimman vaivatonta.
-- Sovelluksen peruskäyttö on maksutonta.
-- Sovellukseen pitää voida lisätä myöhemmin maksullisia lisäominaisuuksia tai muita kehittäjälle tuloja tuottavia toimintoja. Ansaintamallia ei ole vielä valittu.
+- Sovellus on kokonaan maksuton. Maksullisia ominaisuuksia, mainontaa tai muita tulonlähteitä ei toteuteta.
+- Sovellus on avoimen lähdekoodin projekti, joka suosii avoimia tietolähteitä ja avointa teknologiaa.
 - Omia tuotteita, ruokia ja suosikkiaterioita voi tallentaa.
 - Puuttuvan kauppatuotteen tiedot on tarkoitus lisätä myös Open Food Factsiin.
 - Open Food Facts ja Fineli ovat suunniteltuja tietolähteitä. Keskon tietojen hyödyntämismahdollisuus selvitetään.
@@ -43,7 +43,7 @@ Ensimmäiseen versioon eivät kuulu:
 - makroravinteiden tavoitteet tai ravitsemuksen kokonaisarviointi;
 - sosiaaliset toiminnot, kilpailut tai käyttöputkien palkitseminen;
 - ruoka-annoksen kalorien arviointi pelkän ateriakuvan perusteella;
-- maksujen perimisen, tilausten hallinnan, mainonnan tai muiden tulonlähteiden käyttöönotto. Niiden toteuttaminen ei ole ensimmäisen version edellytys, mutta maksuton peruskäyttö ja myöhempi ansainta huomioidaan alusta lähtien (kohta 5.8).
+- maksujen periminen, tilaukset, mainonta, kaupallinen yhteistyö tai muut tulonlähteet. Niitä ei toteuteta myöhemminkään (kohta 5.8).
 
 ## 4. Vaatimusten prioriteetit
 
@@ -142,24 +142,20 @@ Tavoite on, että käyttäjän lisäämä, Open Food Factsista puuttuva kauppatu
 | HIS-03 | P1 | Käyttäjä voi viedä oman päiväkirjansa, omat ruoat, suosikit ja asetukset tiedostoon ja palauttaa ne myöhemmin. Tiedostomuoto valitaan toteutussuunnitelmassa. |
 | HIS-04 | P1 | Käyttäjä voi poistaa omat tietonsa sovelluksesta. Poisto ei väitä poistavansa jo Open Food Factsissa julkaistua tuotetietoa. |
 
-### 5.8 Maksuton peruskäyttö ja myöhempi ansainta
+### 5.8 Maksuttomuus ja avoimuus
 
-Maksuttomaksi peruskäytöksi määritellään tämän version P1-vaatimusten mukainen paastopäivien kalorikirjanpito: kalorirajan asettaminen, päivän yhteenveto, ruokakirjaukset ja niiden muokkaus, tuotehaut ja viivakoodin luku, omat tuotteet ja suosikkiateriat, OFF-tuotteiden lisääminen, historia sekä omien tietojen vienti, palautus ja poistaminen. P1-vaatimuksiin sisältyvä käytettävyys ja toimintavarmuus koskevat myös maksutonta käyttöä. Tämä tarkempi maksuttoman peruskäytön rajaus on ehdotus käyttäjän vahvistaman maksuttomuustavoitteen toteuttamiseksi.
+Sovellus on kokonaan maksuton, eikä siihen lisätä maksullisia ominaisuuksia, mainontaa tai muita tulonlähteitä. Lähdekoodi julkaistaan avoimena, jotta kuka tahansa voi tarkistaa, miten tietoja käsitellään, kääntää sovelluksen itse ja osallistua kehitykseen. Lisenssi ja julkaisutapa valitaan toteutussuunnitelmassa.
 
-Myöhempi ansainta voi perustua esimerkiksi erikseen määriteltäviin maksullisiin lisäominaisuuksiin, kertamaksuun, tilaukseen, vapaaehtoiseen tukimaksuun, mainontaan, sponsorointiin tai kumppanuustuloihin. Nämä ovat vaihtoehtoja, eivät päätös ottaa kaikkia tai mitään yksittäistä niistä käyttöön. Lisäominaisuudet tukevat edelleen sovelluksen rajattua käyttötarkoitusta.
+Versiossa 0.2 olleet ansaintaa koskevat vaatimukset ANS-03–ANS-10 on poistettu. Niiden tunnuksia ei käytetä uudelleen.
 
 | Tunnus | Prioriteetti | Vaatimus |
 | --- | --- | --- |
-| ANS-01 | P1 | Maksuton peruskäyttö ei edellytä maksukorttia, ostosta, tilausta tai maksullisen kokeilun aloittamista. |
-| ANS-02 | P1 | Maksutonta peruskäyttöä ei rajoiteta määräaikaiseksi kokeiluksi eikä kirjattavien paastopäivien tai ruokakirjausten maksulliseksi käyttökiintiöksi. |
-| ANS-03 | P1 | Maksullisia lisäominaisuuksia ja muita tulonlähteitä pitää voida lisätä myöhemmin siten, että määritelty maksuton peruskäyttö säilyy. Tekninen toteutus päätetään erikseen. |
-| ANS-04 | P1 | Ensimmäinen versio voidaan julkaista ilman toimivaa maksamista tai muuta ansaintatoimintoa. Käyttämättömiä ostopolkuja ei tarvitse rakentaa ensimmäiseen versioon. |
-| ANS-05 | P2 | Ennen maksullisen toiminnon käyttöönottoa käyttäjälle esitetään selvästi sisältö, hinta, maksun kertaluonteisuus tai toistuvuus sekä mahdollisen tilauksen ehdot. Ostaminen edellyttää käyttäjän nimenomaista toimintoa. |
-| ANS-06 | P2 | Maksullisen lisäominaisuuden ostamatta jättäminen tai käyttöoikeuden päättyminen ei estä maksutonta peruskäyttöä, aiempien peruskäytön kirjausten lukemista eikä omien tietojen vientiä tai poistamista. |
-| ANS-07 | P2 | Mahdollinen mainonta ja kaupallinen yhteistyö ovat tunnistettavia. Mainoksen katsominen, kumppanilinkin avaaminen tai ostoksen tekeminen ei ole peruskirjauksen edellytys. |
-| ANS-08 | P2 | Ostoihin tai mainontaan liittyvät näkymät eivät keskeytä käynnissä olevaa ruokakirjausta tai peitä päivän kaloriyhteenvetoa. |
-| ANS-09 | P2 | Kaupallinen sisältö erotetaan tuotetiedosta. Maksu tai kumppanuus ei muuta tuotteen ravintoarvoja tai niiden laskentaa. |
-| ANS-10 | Selvitettävä | Maksulliset lisäominaisuudet, hinnoittelu ja muut tulonlähteet määritellään ennen ansaintatoimintojen toteutusta. Esimerkiksi lisäraportointi, vapaaehtoinen synkronointi tai pakkaustekstin tunnistus ovat arvioitavia vaihtoehtoja, eivät tässä päätettyjä maksullisia ominaisuuksia. |
+| ANS-01 | P1 | Sovelluksen käyttö ei edellytä maksukorttia, ostosta, tilausta tai maksullisen kokeilun aloittamista. |
+| ANS-02 | P1 | Käyttöä ei rajoiteta määräaikaiseksi kokeiluksi eikä kirjattavien paastopäivien tai ruokakirjausten käyttökiintiöksi. |
+| AVO-01 | P1 | Sovelluksen ja sen omien palvelinosien lähdekoodi on julkisesti saatavilla avoimen lähdekoodin lisenssillä. |
+| AVO-02 | P1 | Sovellus ei sisällä mainontaa, maksullisia ominaisuuksia, kaupallista yhteistyötä eikä käyttäjän seurantaa tai analytiikkaa. |
+| AVO-03 | P1 | Julkinen lähdekoodi ei sisällä salaisuuksia, kuten palvelutunnuksia. Sovelluksen voi kääntää ja ajaa julkisen ohjeen mukaan ilman kehittäjän tunnuksia; vain OFF-julkaisu edellyttää omaa välityspalvelua tunnuksineen. |
+| AVO-04 | Selvitettävä | Suljettujen kirjastojen, palvelujen ja jakelukanavien käyttöä vähennetään, kun avoin vaihtoehto on riittävän hyvä. Jakelu avoimen lähdekoodin sovelluskaupassa (esim. F-Droid) selvitetään. |
 
 ## 6. Laskenta ja tietojen laatu
 
@@ -207,9 +203,7 @@ Kaikkien P1-vaatimusten tulee täyttyä. Seuraavat käyttötilanteet ovat vähim
 11. **Tietojen palautus:** omien tietojen vienti ja palautus säilyttävät päivät, määrät, energiatiedot, suosikit ja asetukset. Palautus ei luo huomaamattomia kaksoiskirjauksia.
 12. **Tavallinen päivä:** päivää ei merkitä epäonnistuneeksi tai puutteelliseksi siksi, ettei se ole paastopäivä eikä sisällä ruokakirjauksia.
 
-13. **Maksuton peruskäyttö:** P1-toiminnot ovat käytettävissä ilman ostosta. Kalorikirjanpidossa ei ole paastopäivien tai ruokakirjausten maksullista kiintiötä eikä kokeilujakson päättymistä. Ensimmäinen versio toimii ilman maksullisia ominaisuuksia tai muita tulonlähteitä.
-
-Ennen myöhempien ansaintatoimintojen julkaisua hyväksytään lisäksi niitä koskevat ANS-05–ANS-09-vaatimukset. Maksullisen käyttöoikeuden päättymisen vaikutukset testataan, jos valittu ansaintamalli sisältää tällaisen käyttöoikeuden.
+13. **Maksuton ja avoin:** kaikki toiminnot ovat käytettävissä ilman ostosta, kiintiöitä tai kokeilujaksoa, eikä sovelluksessa ole mainontaa tai analytiikkaa. Lähdekoodi on julkisesti saatavilla avoimella lisenssillä, se ei sisällä salaisuuksia, ja sovelluksen voi kääntää julkisen ohjeen mukaan.
 
 ## 10. Myöhempään toteutussuunnitelmaan jäävät päätökset
 
@@ -222,8 +216,8 @@ Ennen myöhempien ansaintatoimintojen julkaisua hyväksytään lisäksi niitä k
 - Julkaisua odottavien tuotetietojen säilytys ja epäonnistuneiden lähetysten uudelleenyritykset.
 - P2-ominaisuuksien, erityisesti pakkaustekstin tunnistuksen, muistutusten ja viikkorytmin, toteutusjärjestys.
 - Mahdollisen myöhemmän monen laitteen käytön ja laajemman jakelun vaatimukset.
-- Maksullisten lisäominaisuuksien sisältö, hinnoittelu ja mahdolliset muut tulonlähteet erillisinä tuotepäätöksinä.
-- Valitun ansaintamallin tekninen toteutus, mahdollinen maksaminen, käyttöoikeuksien hallinta ja tarvittavien ehtojen selvittäminen.
+- Lähdekoodin lisenssi, julkinen repositorio ja osallistumisen käytännöt.
+- Suljettujen riippuvuuksien ja jakelukanavien avoimet vaihtoehdot (AVO-04).
 
 ## 11. Tietolähteiden lähtöviitteet
 
@@ -237,5 +231,6 @@ Linkit ovat toteutussuunnittelun lähtökohtia. Tämä vaatimusmäärittely ei v
 
 ## 12. Muutoshistoria
 
+- **0.3 / 25.10.2026:** Luovuttu ansainnasta: sovellus on kokonaan maksuton avoimen lähdekoodin projekti. Poistettu ANS-03–ANS-10, lisätty AVO-01–AVO-04 ja muutettu hyväksymiskriteeri 13.
 - **0.2 / 18.10.2026:** Lisätty maksuton peruskäyttö ja mahdollisuus myöhempiin maksullisiin lisäominaisuuksiin tai muihin tulonlähteisiin. Tarkennettu rajausta ja hyväksymiskriteerejä. Ansaintamallia, hinnoittelua tai maksullisten ominaisuuksien sisältöä ei ole valittu.
 - **0.1 / 18.10.2026:** Ensimmäinen keskustelun pohjalta laadittu luonnos.

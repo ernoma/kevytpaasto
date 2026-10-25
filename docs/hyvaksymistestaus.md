@@ -18,8 +18,9 @@ Tila: **ei todennettu** | **osittain todennettu** | **todennettu**. Kun kriteeri
 | 10 | Historiallinen eheys: energiatiedon, aterian tai oletusrajan muutos ei muuta vanhoja kirjauksia tai rajaa | 2 | Vitest (tietokanta, palvelut) | – | ei todennettu | – |
 | 11 | Tietojen palautus: vienti ja palautus säilyttävät tiedot ilman huomaamattomia kaksoiskirjauksia | 5 | Vitest (vienti–palautus-kierros) | – | ei todennettu | – |
 | 12 | Tavallinen päivä: ei-paastopäivää ei merkitä epäonnistuneeksi tai puutteelliseksi | 1 | Manuaalinen + Maestro | – | ei todennettu | – |
-| 13 | Maksuton peruskäyttö: P1-toiminnot ilman ostoa, ei kiintiöitä eikä kokeilujaksoa | 7 | Katselmointi (`entitlements.has()` aina `false`) + manuaalinen | – | ei todennettu | – |
+| 13 | Maksuton ja avoin: ei ostoja, kiintiöitä, kokeilujaksoa, mainontaa eikä analytiikkaa; lähdekoodi julki avoimella lisenssillä ilman salaisuuksia, käännettävissä READMEn ohjeella | 7 | Katselmointi (riippuvuuslista: ei osto-, mainos- tai analytiikkakirjastoja) + salaisuusskannaus Git-historiasta + puhdas käännös READMEn mukaan | – | ei todennettu | – |
 
 ## Muutoshistoria
 
+- **25.10.2026:** Kriteeri 13 päivitetty vaatimusmäärittelyn 0.3 mukaiseksi (maksuton ja avoin).
 - **18.10.2026:** Pohja luotu vaiheessa 0. Mitään kriteeriä ei ole vielä todennettu.

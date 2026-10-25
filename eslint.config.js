@@ -45,7 +45,6 @@ module.exports = defineConfig([
                 '@/db/*',
                 '@/services/*',
                 '@/integrations/*',
-                '@/entitlements/*',
                 '@/ui/*',
                 '@/app/*',
               ],

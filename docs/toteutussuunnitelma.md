@@ -1,9 +1,9 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 0.3  
-Päiväys: 18.10.2026  
+Versio: 0.4  
+Päiväys: 25.10.2026  
 Tila: luonnos  
-Perustuu: [vaatimusmäärittely 0.2](../5-2-paasto-vaatimusmaarittely.md)
+Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
 
 Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tekniset päätökset ja jakaa toteutuksen vaiheisiin. Vaatimuksiin viitataan niiden tunnuksilla (esim. KIR-08). Merkintä **[tarkistettava]** tarkoittaa oletusta, joka varmistetaan ennen kyseisen osan toteutusta.
 
@@ -11,7 +11,7 @@ Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tek
 
 | Aihe | Päätös | Vaatimukset |
 | --- | --- | --- |
-| Sovellustyyppi | Natiivisovellus: React Native + Expo (managed workflow), TypeScript | ANS-03, HAK-01 |
+| Sovellustyyppi | Natiivisovellus: React Native + Expo (managed workflow), TypeScript | HAK-01, KIR-06 |
 | Ensimmäinen alusta | Android. iOS myöhemmin samasta koodikannasta EAS Buildilla. | – |
 | Jakelu kehitysvaiheessa | Expo development build omaan puhelimeen; myöhemmin Google Play (sisäinen testaus → tuotanto) | – |
 | Paikallinen tietovarasto | SQLite (expo-sqlite) + Drizzle ORM, versioidut migraatiot | KIR-06, LAA-04 |
@@ -20,12 +20,12 @@ Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tek
 | OFF-julkaisu | Paikallinen lähetysjono → kevyt välityspalvelu (serverless), joka käyttää sovelluksen OFF-tunnuksia | OFF-01…OFF-10 |
 | Käyttäjätilit | Ei käyttäjätilejä eikä pilvisynkronointia v1:ssä | KAY-02, TIE-02 |
 | Vienti ja palautus | JSON-tiedosto, skeemaversio, UUID-pohjainen yhdistäminen | HIS-03, kriteeri 11 |
-| Ansainta | Vain käyttöoikeusrajapinta (`entitlements`), ei maksutoimintoja v1:ssä | ANS-01…ANS-04 |
+| Lisenssi ja ansainta | Avoin lähdekoodi, GPL-3.0-or-later koko monorepolle. Ei maksullisia ominaisuuksia, mainontaa eikä analytiikkaa; ei käyttöoikeusrajapintaa (docs/adr/0006). | ANS-01, ANS-02, AVO-01…AVO-04 |
 | Testaus | Vitest ydinlogiikalle ja tietokantakerrokselle, Maestro keskeisille käyttöpoluille | Luku 9 |
 
 ### 1.1 Hylätyt vaihtoehdot
 
-- **PWA / selainsovellus:** nopein aloittaa, mutta iOS voi tyhjentää selaimen tallennustilan (riski KIR-06:lle ja LAA-04:lle), viivakoodin luku vaihtelee selaimittain eikä sovelluskauppaostoja voi käyttää (ANS-03).
+- **PWA / selainsovellus:** nopein aloittaa, mutta iOS voi tyhjentää selaimen tallennustilan (riski KIR-06:lle ja LAA-04:lle), ja viivakoodin luku vaihtelee selaimittain.
 - **Flutter:** teknisesti yhtä hyvä. TypeScript valittiin, jotta sovellus, välityspalvelu ja aineistoskriptit jakavat kielen ja tyypit.
 - **Pilvitietokanta (esim. Firebase, Supabase):** tarpeeton ilman tilejä ja synkronointia, ja toisi henkilötietojen käsittelyn palvelimelle.
 
@@ -68,7 +68,6 @@ app/                    Expo-sovellus
     integrations/
       off/              OFF-haku ja julkaisujonon asiakas
       fineli/           paikallisen Fineli-tietokannan haku
-    entitlements/       käyttöoikeusrajapinta (v1: ei lisäominaisuuksia)
     ui/                 jaetut komponentit, teema, tekstit (fi)
   assets/fineli.db      rakennusvaiheessa tuotettu aineisto
   tests/                Vitest-testit (domain, db, services)
@@ -76,6 +75,8 @@ app/                    Expo-sovellus
 proxy/                  välityspalvelu (OFF-julkaisu)
 scripts/fineli/         Finelin avoimen aineiston muunnos SQLiteksi
 docs/                   suunnitelmat ja päätösmuistiot (docs/adr/)
+LICENSE                 GPL-3.0-lisenssin teksti
+README.md               kuvaus, kääntöohje, lisenssi ja tietolähteet
 ```
 
 Repositorio on yksi monorepo (npm workspaces). Jaettu tyyppimäärittely OFF-julkaisupyynnölle on `proxy`n ja `app`in yhteinen.
@@ -233,11 +234,15 @@ Ennen vaihetta 1 tehdään kevyet rautalankaluonnokset Tänään- ja Lisää-nä
 - **Staattiset tarkistukset:** TypeScript `strict`, ESLint, Prettier. `npm run check` ajaa kaikki.
 - **Hyväksymistestauksen seuranta:** `docs/hyvaksymistestaus.md` listaa kriteerit 1–13 ja kunkin todentavan testin tai manuaalisen tarkistuksen.
 
-## 10. Ansainta (valmius)
+## 10. Avoin lähdekoodi ja maksuttomuus
 
-- `entitlements.has(feature: PremiumFeature): boolean` – v1:ssä `PremiumFeature` on tyhjä ja funktio palauttaa aina `false`.
-- Sääntö: P1-toimintoja ei koskaan kytketä `entitlements`-tarkistukseen (ANS-01, ANS-02, ANS-06).
-- Kun ansaintamalli valitaan (ANS-10), toteutus tehdään sovelluskauppojen ostorajapinnalla (esim. RevenueCat tai expo-iap) erillisen päätösmuistion pohjalta.
+- **Lisenssi:** GPL-3.0-or-later koko monorepolle (sovellus, välityspalvelu, skriptit). Juuressa on `LICENSE`, ja jokaisen `package.json`:n `license`-kenttä on `GPL-3.0-or-later` (AVO-01, docs/adr/0006).
+- **Ei ansaintaa:** sovelluksessa ei ole maksullisia ominaisuuksia, ostopolkuja, mainontaa, kumppanilinkkejä eikä analytiikka- tai virheraportointipalvelua, joka lähettäisi tietoja laitteelta. Käyttöoikeusrajapintaa (`entitlements`) ei toteuteta (ANS-01, ANS-02, AVO-02).
+- **Salaisuudet:** repo on julkinen, joten tunnuksia, avaimia tai henkilökohtaisia yhteystietoja ei tallenneta siihen. OFF-tunnukset ovat vain välityspalvelun salaisuuksissa; välityspalvelun osoite ja `User-Agent`-otsakkeen yhteystieto tulevat käännösaikaisesta konfiguraatiosta, jolla on julkinen oletusarvo (AVO-03).
+- **Itse kääntäminen:** README kertoo, miten sovellus käännetään ja ajetaan ilman kehittäjän tunnuksia. Ilman välityspalvelun osoitetta OFF-julkaisu näkyy käyttäjälle pois käytöstä, mutta kaikki muu toimii (AVO-03, OFF-06).
+- **Riippuvuuksien lisenssit:** uuden riippuvuuden lisenssin on oltava GPL-3.0:n kanssa yhteensopiva (esim. MIT, BSD, Apache-2.0, ISC). Tietolähteiden lisenssit (Fineli CC BY 4.0, OFF ODbL) koskevat aineistoa, eivät koodia, ja mainitaan READMEssa ja Tietolähteet-näkymässä (TIE-03).
+- **Suljetut riippuvuudet (AVO-04):** nykyiset ratkaisut säilyvät: viivakoodin luku Google ML Kitillä (`expo-camera`, docs/adr/0002), jakelu Google Playssa ja välityspalvelu Cloudflare Workersissa. Välityspalvelu kirjoitetaan niin, ettei OFF-logiikka riipu Workers-rajapinnoista, jotta sen voi ajaa myös muualla. Avoimet vaihtoehdot (ZXing-pohjainen lukija, F-Droid-jakelu, käännös ilman EAS-pilveä) arvioidaan vaiheen 7 jälkeen.
+- **Osallistuminen:** ulkopuolisten muutosehdotusten käytännöt (CONTRIBUTING, käytösohje) kirjoitetaan, kun repo avataan julkiseksi.
 
 ## 11. Toteutusvaiheet
 
@@ -245,14 +250,14 @@ Jokainen vaihe on pystyviipale, joka jättää sovelluksen käyttökelpoiseen ti
 
 | Vaihe | Sisältö | Vaatimukset | Valmis, kun |
 | --- | --- | --- | --- |
-| 0. Pohja ja kokeilut | Monorepo, Expo-projekti, TypeScript strict, Vitest, Drizzle + migraatiot, `npm run check`. Kokeilut: viivakoodin luku omalla puhelimella, Finelin aineiston muunnos, OFF-testiympäristöön kirjoittaminen. | – | Tyhjä sovellus käynnistyy puhelimessa; kokeilujen tulokset kirjattu `docs/adr/`. |
+| 0. Pohja ja kokeilut | Monorepo, Expo-projekti, TypeScript strict, Vitest, Drizzle + migraatiot, `npm run check`, `LICENSE` ja README. Kokeilut: viivakoodin luku omalla puhelimella, Finelin aineiston muunnos, OFF-testiympäristöön kirjoittaminen. | AVO-01 | Tyhjä sovellus käynnistyy puhelimessa; kokeilujen tulokset kirjattu `docs/adr/`. |
 | 1. Paastopäivä ja pikakirjaus | Domain-laskenta, aloitus, Tänään-näkymä, pikakirjaus, muokkaus, poisto, ylitys | KAY-01…03, PAI-01…06, KIR-02, KIR-05…07, LAS-*, LAA-01, LAA-03, LAA-07, LAA-08 | Kriteerit 1, 3 ja 12 |
 | 2. Omat ruoat ja suosikit | Omat tuotteet, annokset, suosikit, suosikkiateriat, pikanapit | KIR-03, KIR-04, KIR-08, OMA-01…07, LAA-02 | Kriteerit 2, 7, 8, 10 |
 | 3. Fineli | Aineistoskripti, paikallinen haku, kirjaus Fineli-tuotteesta | HAK-02, HAK-03, HAK-04, LAS-06, TIE-03 | Fineli-osa kriteeristä 4 |
 | 4. OFF-haku ja viivakoodi | Nimihaku, viivakoodihaku kameralla ja käsin, välimuisti, oma korjaus | HAK-01, HAK-03…08, KAY-04, LAA-04, LAA-05 | Kriteerit 4 ja 9 |
 | 5. Historia ja tiedot | Historia, kopiointi, vienti, palautus, poisto | HIS-01…04 | Kriteeri 11 |
 | 6. OFF-julkaisu | Uusi tuote -lomake, kuvat, julkaisujono, välityspalvelu, tilat ja uudelleenyritys | OFF-01…10, TIE-01, TIE-04 | Kriteerit 5 ja 6 |
-| 7. Viimeistely ja v1 | Saavutettavuus, tekstit, tietolähdenäkymä, tietosuojaseloste, Google Play -julkaisu | LAA-06, TIE-03, TIE-05, ANS-01…04 | Kaikki P1-vaatimukset ja kriteeri 13 |
+| 7. Viimeistely ja v1 | Saavutettavuus, tekstit, tietolähdenäkymä, tietosuojaseloste, repon avaaminen julkiseksi (salaisuuksien tarkistus historiasta, README, osallistumisohje), Google Play -julkaisu | LAA-06, TIE-03, TIE-05, ANS-01, ANS-02, AVO-01…03 | Kaikki P1-vaatimukset ja kriteeri 13 |
 
 Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 
@@ -267,6 +272,9 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 | Välityspalvelun väärinkäyttö | OFF:iin roskatuotteita sovelluksen nimissä | Nopeusrajoitus, palvelinpuolen validointi, mahdollisuus sulkea julkaisu etäkytkimellä |
 | iOS-tuki | Toissijainen kohderyhmä | Koodi pidetään alustariippumattomana; iOS-käännös EAS Buildilla vaiheen 7 jälkeen |
 | Tietosuoja Google Playssa | Julkaisu vaatii tietoturvaselosteen | Päiväkirja pysyy laitteella; välityspalvelu käsittelee vain julkaistavia tuotetietoja |
+| Salaisuus päätyy julkiseen repoon | Tunnus vuotaa, kun repo avataan | Tunnukset vain välityspalvelun salaisuuksissa; Git-historia tarkistetaan (esim. gitleaks) ennen julkaisua vaiheessa 7 |
+| Muiden käyttämä välityspalvelu | Itse käännetyt tai muutetut versiot julkaisevat OFF:iin sovelluksen tunnuksilla | Välityspalvelun osoite ei ole kovakoodattu; nopeusrajoitus ja palvelinpuolen validointi; muut kääntäjät käyttävät omaa välityspalveluaan |
+| Suljetut riippuvuudet (ML Kit, Google Play, Cloudflare) | Sovellus ei kelpaa F-Droidiin | Hyväksytty v1:lle; avoimet vaihtoehdot arvioidaan vaiheen 7 jälkeen (AVO-04) |
 
 ## 13. Päätösmuistiot
 
@@ -274,6 +282,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **0.4 / 25.10.2026:** Vaatimusmäärittelyn 0.3 mukaisesti luovuttu ansainnasta ja `entitlements`-rajapinnasta. Projekti on avointa lähdekoodia GPL-3.0-or-later-lisenssillä; lisätty luku 10 avoimuudesta, riskit julkisesta reposta ja suljetuista riippuvuuksista (päätösmuistio 0006).
 - **0.3 / 18.10.2026:** Expo SDK 57 SDK 58:n sijaan, jotta sovellus avautuu kehittäjän puhelimen Expo Go -versiossa (päätösmuistio 0005).
 - **0.2 / 18.10.2026:** Vaihe 0: [tarkistettava]-kohdat päivitetty OFF:n ja Finelin ajantasaisten ohjeiden mukaan (OFF-haun rajat ja nimihaun toteutus, API v3, sovellusmerkintä ja lisenssit, Finelin lisenssi ja lataustapa). Reitit ovat hakemistossa `app/src/app/` Expo SDK 58:n mukaisesti. Päätösmuistiot 0001–0004.
 - **0.1 / 18.10.2026:** Ensimmäinen luonnos vaatimusmäärittelyn 0.2 pohjalta.

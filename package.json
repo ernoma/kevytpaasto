@@ -1,6 +1,7 @@
 {
   "name": "kevytpaasto",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "version": "0.0.0",
   "workspaces": [
     "app",

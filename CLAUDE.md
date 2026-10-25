@@ -66,9 +66,11 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 - Kehityksessä ja testeissä OFF-kirjoitukset tehdään vain OFF:n testiympäristöön, ei tuotantoon.
 - OFF-pyynnöissä lähetetään `User-Agent`-otsake sovelluksen nimellä ja versiolla.
 
-## Ansainta
+## Avoin lähdekoodi
 
-- `entitlements.has()` palauttaa v1:ssä aina `false`. P1-toimintoja ei koskaan kytketä käyttöoikeustarkistukseen (ANS-01, ANS-02).
+- Projekti on avointa lähdekoodia, lisenssi GPL-3.0-or-later (`docs/adr/0006-avoin-lahdekoodi.md`). Repo on tarkoitus avata julkiseksi: älä tallenna siihen tunnuksia, avaimia tai henkilökohtaisia yhteystietoja (AVO-03).
+- Ei maksullisia ominaisuuksia, ostopolkuja, mainontaa eikä analytiikkaa tai muuta laitteelta tietoja lähettävää seurantaa (ANS-01, ANS-02, AVO-02).
+- Uuden riippuvuuden lisenssin on oltava GPL-3.0:n kanssa yhteensopiva. Suosi avointa vaihtoehtoa, kun se on riittävän hyvä (AVO-04).
 
 ## Käyttöliittymä
 
