@@ -66,7 +66,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 - Päiväkirja, kaloriraja ja syödyt määrät eivät koskaan lähde laitteelta (OFF-04, TIE-02).
 - OFF-julkaisuun menee vain käyttäjän hyväksymä `publish_job.payload_json`. Fineli- tai muusta lähteestä kopioitua tietoa ei esitäytetä julkaistavaksi (OFF-10).
 - OFF-tunnukset ovat vain välityspalvelun salaisuuksissa, eivät koskaan sovelluskoodissa tai repossa.
-- Kehityksessä ja testeissä OFF-kirjoitukset tehdään vain OFF:n testiympäristöön, ei tuotantoon.
+- **OFF-osoite:** kaikki OFF-kutsut, myös haut, kokeilut ja tarkistukset, tehdään vain testiympäristön osoitteeseen `https://world.openfoodfacts.net`. Muutos mihinkään muuhun Open Food Factsin palvelun osoitteeseen (esim. tuotanto `world.openfoodfacts.org` tai Search-a-licious) vaatii kehittäjän nimenomaisen päätöksen. Älä tee muutosta omalla päätökselläsi, vaikka vaihe, testi tai OFF:n ohje näyttäisi edellyttävän sitä, vaan kysy ensin (`docs/adr/0011-off-testiymparisto-ennen-julkaisua.md`). Kehityksessä saa käyttää myös kehitteillä olevaa backendiä varten tehtyä paikallista kopiota OFF:n datasta.
 - OFF-pyynnöissä lähetetään `User-Agent`-otsake sovelluksen nimellä ja versiolla.
 
 ## Avoin lähdekoodi

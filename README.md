@@ -14,7 +14,7 @@ npm run check
 cd app && npx expo start
 ```
 
-Sovellus avautuu puhelimen Expo Go -sovelluksessa (SDK 58) tai development buildissa. Käyttöliittymätestit ajetaan Android-emulaattorissa Maestrolla (`npm run emulator`, `npm run e2e`); asennus ja komennot on kuvattu tiedostossa [docs/adr/0007-emulaattoritestaus.md](docs/adr/0007-emulaattoritestaus.md). Kehittäjän tunnuksia ei tarvita. Tuotteiden julkaisu Open Food Factsiin edellyttää erillistä välityspalvelua (`proxy/`) omine OFF-tunnuksineen.
+Sovellus avautuu puhelimen Expo Go -sovelluksessa (SDK 58) tai development buildissa. Käyttöliittymätestit ajetaan Android-emulaattorissa Maestrolla (`npm run emulator`, `npm run e2e`); asennus ja komennot on kuvattu tiedostossa [docs/adr/0007-emulaattoritestaus.md](docs/adr/0007-emulaattoritestaus.md). Kehittäjän tunnuksia ei tarvita. Tuotteiden julkaisu Open Food Factsiin edellyttää erillistä välityspalvelua (`proxy/`) omine OFF-tunnuksineen. Kaikki Open Food Factsin kutsut tehdään testiympäristöön (`https://world.openfoodfacts.net`), ja muutos muuhun Open Food Factsin palvelun osoitteeseen vaatii projektin kehittäjän nimenomaisen päätöksen, ks. [docs/adr/0011-off-testiymparisto-ennen-julkaisua.md](docs/adr/0011-off-testiymparisto-ennen-julkaisua.md).
 
 ## Tietolähteet
 
