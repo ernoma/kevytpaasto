@@ -89,7 +89,8 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 - Commitit tehdään suoraan `main`-haaraan, ei erillisiin haaroihin.
 - Commitit tehdään kysymättä erikseen lupaa, kun työ on valmis: `npm run check` menee läpi, ja käyttöliittymämuutokset on todennettu emulaattorissa. Keskeneräistä työtä ei commitoida.
 - Yksi commit kattaa yhden kokonaisuuden. Commitiin otetaan vain tehtävän tiedostot nimeltä, ei `git add .`. Jos työhakemistossa on muita muutoksia, niistä kerrotaan kehittäjälle.
-- Pushaus vaatii aina kehittäjän erillisen luvan. Historiaa ei muuteta ilman lupaa (`amend`, `rebase`, `reset`).
+- Valmis commit pushataan `main`-haaraan kysymättä, kun repo on yksityinen. Ennen pushausta tarkistetaan, ettei muutoksissa ole tunnuksia, avaimia tai henkilökohtaisia yhteystietoja. Kun repo avataan julkiseksi, tämä sääntö arvioidaan uudelleen, ja siihen asti pushaus vaatii luvan.
+- Force push vaatii aina kehittäjän erillisen luvan, eikä historiaa muuteta ilman lupaa (`amend`, `rebase`, `reset`). Pushauslupa ei koske tuotantoon vaikuttavia toimia, kuten välityspalvelun deployta.
 - Hyväksymiskriteereistä tehdään testit aina kun mahdollista. Päivitä `docs/hyvaksymistestaus.md`, kun kriteeri todennetaan.
 - Työ on valmis, kun `npm run check` menee läpi. Jos muutos koskee käyttöliittymää, todenna se myös itse emulaattorissa: käynnistä emulaattori ja Metro taustalle (`npm run emulator`, `npx expo start` hakemistossa `app/`), aja `npm run e2e`, katso kuvakaappaukset ja tarkista tekstin suurennus (`font 1.3` ja `font 2.0`) sekä lentotila (`offline`). Kehittäjää ei pyydetä kokeilemaan sitä, minkä voit todentaa emulaattorissa.
 - Puhelimella kokeiltavaksi jää vain kameralla luettava viivakoodi, tuntuma ja nopeus sekä TalkBack. Kerro ne erikseen vaiheen lopussa.
