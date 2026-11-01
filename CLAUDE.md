@@ -85,6 +85,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 ## Työtapa
 
 - Yksi sessio vastaa yleensä yhtä toteutussuunnitelman vaiheen osaa. Mainitse toteutetut vaatimustunnukset commit-viestissä ja testien nimissä.
+- Commitit tehdään suoraan `main`-haaraan, ei erillisiin haaroihin.
 - Hyväksymiskriteereistä tehdään testit aina kun mahdollista. Päivitä `docs/hyvaksymistestaus.md`, kun kriteeri todennetaan.
 - Työ on valmis, kun `npm run check` menee läpi. Jos muutos koskee käyttöliittymää, todenna se myös itse emulaattorissa: käynnistä emulaattori ja Metro taustalle (`npm run emulator`, `npx expo start` hakemistossa `app/`), aja `npm run e2e`, katso kuvakaappaukset ja tarkista tekstin suurennus (`font 1.3` ja `font 2.0`) sekä lentotila (`offline`). Kehittäjää ei pyydetä kokeilemaan sitä, minkä voit todentaa emulaattorissa.
 - Puhelimella kokeiltavaksi jää vain kameralla luettava viivakoodi, tuntuma ja nopeus sekä TalkBack. Kerro ne erikseen vaiheen lopussa.
