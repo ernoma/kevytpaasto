@@ -1,11 +1,11 @@
 # 5:2-paastosovellus – toteutussuunnitelma
 
-Versio: 1.2  
+Versio: 1.3  
 Päiväys: 1.11.2026  
 Tila: luonnos  
 Perustuu: [vaatimusmäärittely 0.3](../5-2-paasto-vaatimusmaarittely.md)
 
-Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tekniset päätökset ja jakaa toteutuksen vaiheisiin. Vaatimuksiin viitataan niiden tunnuksilla (esim. KIR-08). Merkintä **[tarkistettava]** tarkoittaa oletusta, joka varmistetaan ennen kyseisen osan toteutusta.
+Tämä dokumentti tekee vaatimusmäärittelyn kohdassa 10 avoimiksi jätetyt tekniset päätökset ja jakaa toteutuksen vaiheisiin. Vaatimuksiin viitataan niiden tunnuksilla (esim. KIR-08). Merkintä **[tarkistettava]** tarkoittaa oletusta, joka varmistetaan ennen kyseisen osan toteutusta. Vaiheiden 0–7 ulkopuoliset tulevaisuuden ideat ovat dokumentissa [ideat.md](ideat.md).
 
 ## 1. Päätösten yhteenveto
 
@@ -248,7 +248,7 @@ Ennen vaihetta 1 tehdään kevyet rautalankaluonnokset Tänään- ja Lisää-nä
 - **Salaisuudet:** repo on julkinen, joten tunnuksia, avaimia tai henkilökohtaisia yhteystietoja ei tallenneta siihen. OFF-tunnukset ovat vain välityspalvelun salaisuuksissa; välityspalvelun osoite, OFF:n osoite ja `User-Agent`-otsakkeen yhteystieto tulevat käännösaikaisesta konfiguraatiosta, jolla on julkinen oletusarvo (AVO-03).
 - **Itse kääntäminen:** README kertoo, miten sovellus käännetään ja ajetaan ilman kehittäjän tunnuksia. Ilman välityspalvelun osoitetta OFF-julkaisu näkyy käyttäjälle pois käytöstä, mutta kaikki muu toimii (AVO-03, OFF-06). Oletuskäännös käyttää OFF:n testiympäristöä. Oman käännöksen osoitteen voi asettaa konfiguraatiossa, mutta tämän projektin käännöksissä osoitteen muutos vaatii kehittäjän nimenomaisen päätöksen (docs/adr/0011).
 - **Riippuvuuksien lisenssit:** uuden riippuvuuden lisenssin on oltava GPL-3.0:n kanssa yhteensopiva (esim. MIT, BSD, Apache-2.0, ISC). Tietolähteiden lisenssit (Fineli CC BY 4.0, OFF ODbL) koskevat aineistoa, eivät koodia, ja mainitaan READMEssa ja Tietolähteet-näkymässä (TIE-03).
-- **Suljetut riippuvuudet (AVO-04):** nykyiset ratkaisut säilyvät: viivakoodin luku Google ML Kitillä (`expo-camera`, docs/adr/0002), jakelu Google Playssa ja välityspalvelu Cloudflare Workersissa. Välityspalvelu kirjoitetaan niin, ettei OFF-logiikka riipu Workers-rajapinnoista, jotta sen voi ajaa myös muualla. Avoimet vaihtoehdot (ZXing-pohjainen lukija, F-Droid-jakelu, käännös ilman EAS-pilveä) arvioidaan vaiheen 7 jälkeen.
+- **Suljetut riippuvuudet (AVO-04):** nykyiset ratkaisut säilyvät: viivakoodin luku Google ML Kitillä (`expo-camera`, docs/adr/0002), jakelu Google Playssa ja välityspalvelu Cloudflare Workersissa. Välityspalvelu kirjoitetaan niin, ettei OFF-logiikka riipu Workers-rajapinnoista, jotta sen voi ajaa myös muualla. Avoimet vaihtoehdot arvioidaan vaiheen 7 jälkeen, ja ne on lueteltu dokumentissa [ideat.md](ideat.md).
 - **Osallistuminen:** ulkopuolisten muutosehdotusten käytännöt (CONTRIBUTING, käytösohje) kirjoitetaan, kun repo avataan julkiseksi.
 
 ## 11. Toteutusvaiheet
@@ -278,7 +278,7 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 | OFF:n testiympäristön tiedot poikkeavat tuotannosta | Haku voi ennen julkaisua löytää eri tuotteet ja tiedot kuin tuotanto | Automaattitestit käyttävät mockattua OFF:ia; tuotannon haku tarkistetaan julkaisukäännöksellä, kun kehittäjä on päättänyt siirtymisestä (docs/adr/0011) |
 | Finelin aineiston rakenne ja lisenssimaininta | Vaihe 3 | Rakenne ja lisenssi selvitetty (docs/adr/0003). fineli.fi estää automaattiset lataukset, joten aineisto ladataan käsin. |
 | Välityspalvelun väärinkäyttö | OFF:iin roskatuotteita sovelluksen nimissä | Nopeusrajoitus, palvelinpuolen validointi, mahdollisuus sulkea julkaisu etäkytkimellä |
-| iOS-tuki | Toissijainen kohderyhmä | Koodi pidetään alustariippumattomana; iOS-käännös EAS Buildilla vaiheen 7 jälkeen |
+| iOS-tuki | Toissijainen kohderyhmä | Koodi pidetään alustariippumattomana; iOS-käännös EAS Buildilla vaiheen 7 jälkeen (selvitettävät asiat: [ideat.md](ideat.md)) |
 | Tietosuoja Google Playssa | Julkaisu vaatii tietoturvaselosteen | Päiväkirja pysyy laitteella; välityspalvelu käsittelee vain julkaistavia tuotetietoja |
 | Salaisuus päätyy julkiseen repoon | Tunnus vuotaa, kun repo avataan | Tunnukset vain välityspalvelun salaisuuksissa; Git-historia tarkistetaan (esim. gitleaks) ennen julkaisua vaiheessa 7 |
 | Muiden käyttämä välityspalvelu | Itse käännetyt tai muutetut versiot julkaisevat OFF:iin sovelluksen tunnuksilla | Välityspalvelun osoite ei ole kovakoodattu; nopeusrajoitus ja palvelinpuolen validointi; muut kääntäjät käyttävät omaa välityspalveluaan |
@@ -290,6 +290,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **1.3 / 1.11.2026:** Tulevaisuuden ideat koottu dokumenttiin `docs/ideat.md`. Sinne siirrettiin suljettujen riippuvuuksien avoimet vaihtoehdot, ja lisättiin iOS-version selvitettävät asiat, OFF:n SDK ja kielituki.
 - **1.2 / 1.11.2026:** Kaikki OFF-kutsut, myös haut ja kriteerin 5 varmennus, tehdään osoitteeseen `https://world.openfoodfacts.net`, joka on myös konfiguraation oletus. Muutos muuhun OFF-palvelun osoitteeseen vaatii kehittäjän nimenomaisen päätöksen; tämä koskee myös Search-a-liciousta ja vaiheen 7 tuotantoon siirtymistä. Kehityksessä saa käyttää myös paikallista kopiota OFF:n datasta (päätösmuistio 0011).
 - **1.1 / 25.10.2026:** Vaihe 3: Fineli Release 20.0 sovelluksen mukana (`app/assets/fineli/`), liitetään käynnistyksessä. Lisää-näkymässä on paikallinen haku omista ruoista ja Finelistä. Fineli-tuote kopioidaan `food`-tauluun ensimmäisellä kirjauksella, ja sen ruokamitat ovat valittavissa annoksina. Tietolähteet-näkymä näyttää THL:n suositteleman viitteen ja lisenssin. Skeema ei muuttunut (päätösmuistio 0010).
 - **1.0 / 25.10.2026:** Vaihe 2b: Lisää-, Määrä- sekä Omat ruoat ja ateriat -näkymät, Tänään-näkymän suosikkipikanapit ja kumoamisilmoitus (noin 8 s, LAA-02). Ruoka- ja ateriakirjauksen nimeä voi korjata (KIR-05); nimeä ei voi tyhjentää. Määrä alkaa yhdestä annoksesta, jos ruoalla on annos, muuten perusteen yksiköstä. Metron välimuisti sidotaan migraatiotiedostoihin, ja uusi migraatio todennetaan emulaattorissa päivityksenä (päätösmuistio 0009).

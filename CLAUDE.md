@@ -7,6 +7,7 @@
 - Vaatimukset: `5-2-paasto-vaatimusmaarittely.md`. Vaatimuksiin viitataan tunnuksilla (esim. KIR-08), hyväksymiskriteereihin numeroilla (luku 9).
 - Tekninen suunnitelma ja vaiheet: `docs/toteutussuunnitelma.md`
 - Päätösmuistiot: `docs/adr/`
+- Tulevaisuuden ideat: `docs/ideat.md`
 - Hyväksymistestauksen seuranta: `docs/hyvaksymistestaus.md`
 
 Lue toteutussuunnitelman asiaankuuluva osa ennen työn aloittamista. Jos tehtävä on ristiriidassa suunnitelman kanssa, kerro siitä ennen toteutusta äläkä muuta arkkitehtuuria hiljaa.
