@@ -41,4 +41,4 @@ Esteitä ei löytynyt, ja avaaminen on nyt helpompaa kuin vaiheessa 7:
 
 ## Toteutus
 
-Repo avattiin julkiseksi 8.11.2026. Samalla GitHubissa kytkettiin päälle salaisuuksien skannaus, push protection ja yksityinen haavoittuvuusilmoitus, ja repolle lisättiin kuvaus. Tilin sähköpostiasetukset kehittäjä kytkee itse.
+Repo avattiin julkiseksi 8.11.2026. Samalla GitHubissa kytkettiin päälle salaisuuksien skannaus, push protection, yksityinen haavoittuvuusilmoitus ja Dependabotin haavoittuvuushälytykset, ja repolle lisättiin kuvaus. Tilin sähköpostiasetukset kehittäjä kytkee itse.
