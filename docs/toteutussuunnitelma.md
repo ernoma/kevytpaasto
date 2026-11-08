@@ -156,7 +156,8 @@ Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
 - Pyynnöissä lähetetään OFF:n ohjeen mukainen HTTP Basic -otsake (`off`/`off`, julkinen arvo, ei salaisuus). Osoite tulee käännösaikaisesta konfiguraatiosta, jonka oletus on `https://world.openfoodfacts.net`, ja testi varmistaa oletuksen sekä sen, ettei koodissa ole muita OFF-kutsujen osoitteita.
 - Viivakoodihaku: tuotteen haku viivakoodilla (API v3; v2 on vanhentunut), pyydetään vain tarvittavat kentät (`fields=`). Lukuraja on 15 tuotehakua/min IP-osoitetta kohden (docs/adr/0004).
 - Nimihaku: OFF:n hakurajapinta, suodatus maahan Suomi ensisijaisesti. Hakurajapinnan raja on 10 hakua/min IP-osoitetta kohden, eikä OFF salli sen käyttöä näppäilyn mukana päivittyvään hakuun (tarkistettu 18.10.2026, docs/adr/0004). Siksi omat ja Fineli-tulokset näytetään heti paikallisesti, ja OFF-haku lähetetään vasta käyttäjän erillisellä toiminnolla (esim. ”Hae myös Open Food Factsista”) tai pitkän viiveen jälkeen vähintään 3 merkillä. Vaiheessa 4 nimihaku tehdään hakupisteellä `/cgi/search.pl` osoitteessa `https://world.openfoodfacts.net`, koska v2-palvelinrajapinnassa ei ole tekstihakua. Search-a-licious (`search.openfoodfacts.org`, `search.openfoodfacts.net`) on eri osoitteessa, joten sen käyttöönotto vaatii kehittäjän nimenomaisen päätöksen.
-- Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti. Hakutulosten yhteydessä ja Tietolähteet-näkymässä mainitaan Open Food Facts ja lisenssi (ODbL) linkkeineen.
+- Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti.
+- Lähdemaininta (TIE-03): OFF:n suosituksen mukainen teksti `(c) Open Food Facts contributors` ja linkki osoitteeseen `https://world.openfoodfacts.org/terms-of-use` näytetään jokaisessa näkymässä, jossa näkyy OFF:sta peräisin olevia tietoja: hakutulokset, viivakoodihaun tulos, Määrä-näkymä OFF-tuotteelle (myös välimuistista ja käyttäjän korjaamana, HAK-08) sekä julkaisun `exists_already`-näkymä. Tänään-näkymässä ja historiasta avatussa päivässä kirjauslistan alla kerrotaan, että kirjausten nimi ja energia voivat olla peräisin Open Food Factsista, ja näytetään sama linkki, kun päivän kirjauksissa on OFF-tuotteesta tehty kirjaus, myös aterian osana. Tieto luetaan `origin_id`-alkuperätiedosta, eikä se vaikuta laskentaan (KIR-08). Tietolähteet-näkymässä on sama teksti ja linkki sekä lisenssit (ODbL, Database Contents License, kuvat CC BY-SA). Linkin kosketusalue on vähintään 48 × 48 dp. Linkki osoittaa OFF:n tuotantosivustolle, mutta se ei ole OFF-kutsu, joten testiympäristösääntö ei koske sitä (docs/adr/0011).
 - Haetut tuotteet tallennetaan `food`-tauluun välimuistiksi, jolloin ne toimivat jatkossa ilman verkkoa (LAA-04).
 - Välimuisti ennen verkkoa: viivakoodihaku etsii tuotetta ensin `food`-taulusta. Jos tuote löytyy ja sen `fetched_at` on riittävän tuore, OFF:ltä ei kysytä uudelleen. Vanhentunut tuote näytetään heti välimuistista, ja tieto päivitetään taustalla, jos verkkoa on. Tuoreusraja päätetään vaiheessa 4.
 - Kameran toistuvat lukemat: kamera voi lukea saman viivakoodin monta kertaa sekunnissa. Sama koodi lähettää pyynnön vain kerran, ja lukeminen keskeytetään, kunnes tulos on näytetty tai käyttäjä palaa lukunäkymään.
@@ -209,14 +210,14 @@ Suomenkielinen, puhelimelle suunniteltu. Tekstit kootaan yhteen tiedostoon (`src
 | Näkymä | Sisältö | Vaatimukset |
 | --- | --- | --- |
 | Aloitus | Kalorirajan syöttö, ei muita kysymyksiä | KAY-01 |
-| Tänään | Paastopäivä: yhteenveto (raja, syöty, jäljellä/ylitys), suosikkipikanapit, kirjauslista. Ei-paastopäivä: ”Aloita paastopäivä” ja pääsy historiaan. | PAI-02…04, LAA-01, LAA-02 |
+| Tänään | Paastopäivä: yhteenveto (raja, syöty, jäljellä/ylitys), suosikkipikanapit, kirjauslista ja tarvittaessa OFF-lähdemaininta (kohta 5.1). Ei-paastopäivä: ”Aloita paastopäivä” ja pääsy historiaan. | PAI-02…04, LAA-01, LAA-02, TIE-03 |
 | Lisää | Välilehdet tai osiot: Haku (OFF + Fineli + omat), Viivakoodi, Pikakirjaus (kcal), Suosikit | KIR-01, KIR-02 |
-| Määrä | Määrä g/ml/annos, laskettu kcal ennen tallennusta, lähde ja peruste näkyvissä | KIR-03, KIR-04, LAS-06 |
+| Määrä | Määrä g/ml/annos, laskettu kcal ennen tallennusta, lähde ja peruste näkyvissä; OFF-tuotteelle lähdemaininta (kohta 5.1) | KIR-03, KIR-04, LAS-06, TIE-03 |
 | Kirjauksen muokkaus | Nimi, määrä, kcal, poisto, siirto toiseen päivään | KIR-05 |
 | Omat ruoat ja ateriat | Lista, lisäys, muokkaus, suosikkimerkintä, aterian kokoaminen | OMA-01…06 |
 | Uusi tuote | Viivakoodi, nimi, merkki, energia ja peruste, kuvat, julkaisun hyväksyntä | OFF-01…07 |
 | Historia | Kalenteri tai lista paastopäivistä, päivän avaus ja kopiointi | HIS-01, HIS-02 |
-| Asetukset | Oletusraja (jos tänään on paastopäivä, kysytään, muutetaanko myös sen raja; tallennuksesta selvä vahvistus), vienti/palautus, tietojen poisto, julkaisujen tila, tietolähteet ja lisenssit | KAY-03, HIS-03, HIS-04, OFF-07, TIE-03 |
+| Asetukset | Oletusraja (jos tänään on paastopäivä, kysytään, muutetaanko myös sen raja; tallennuksesta selvä vahvistus), vienti/palautus, tietojen poisto, julkaisujen tila, tietolähteet ja lisenssit (OFF:n osalta teksti `(c) Open Food Facts contributors` ja linkki käyttöehtoihin, kohta 5.1) | KAY-03, HIS-03, HIS-04, OFF-07, TIE-03 |
 
 ### 7.2 Periaatteet
 
@@ -268,7 +269,7 @@ Jokainen vaihe on pystyviipale, joka jättää sovelluksen käyttökelpoiseen ti
 | 4. OFF-haku ja viivakoodi | Nimihaku, viivakoodihaku kameralla ja käsin, välimuisti, oma korjaus | HAK-01, HAK-03…08, KAY-04, LAA-04, LAA-05 | Kriteerit 4 ja 9 |
 | 5. Historia ja tiedot | Historia, kopiointi, vienti, palautus, poisto | HIS-01…04 | Kriteeri 11 |
 | 6. OFF-julkaisu | Uusi tuote -lomake, kuvat, julkaisujono, välityspalvelu, tilat ja uudelleenyritys | OFF-01…10, TIE-01, TIE-04 | Kriteerit 5 ja 6 |
-| 7. Viimeistely ja v1 | Saavutettavuus, tekstit, tietolähdenäkymä, tietosuojaseloste, repon avaaminen julkiseksi (salaisuuksien tarkistus historiasta, README, osallistumisohje), siirtyminen OFF:n tuotantoon kehittäjän nimenomaisella päätöksellä (API-käytön ilmoituslomake, tuotanto-osoite julkaisukäännökseen ja välityspalveluun, haun tarkistus julkaisukäännöksellä), Google Play -julkaisu | LAA-06, TIE-03, TIE-05, ANS-01, ANS-02, AVO-01…03 | Kaikki P1-vaatimukset ja kriteeri 13 |
+| 7. Viimeistely ja v1 | Saavutettavuus, tekstit, tietolähdenäkymä, tietosuojaseloste, repon avaaminen julkiseksi (salaisuuksien tarkistus historiasta, README, osallistumisohje), siirtyminen OFF:n tuotantoon kehittäjän nimenomaisella päätöksellä (API-käytön ilmoituslomake, tuotanto-osoite julkaisukäännökseen ja välityspalveluun, haun tarkistus julkaisukäännöksellä), Google Play -julkaisu (kauppasivun kuvaukseen ja READMEen OFF:n lähdemaininta `(c) Open Food Facts contributors` linkkeineen, kohta 5.1) | LAA-06, TIE-03, TIE-05, ANS-01, ANS-02, AVO-01…03 | Kaikki P1-vaatimukset ja kriteeri 13 |
 
 Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 
@@ -294,6 +295,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **1.5 / 8.11.2026:** OFF:n lähdemaininta OFF:n suosituksen mukaiseksi (kohta 5.1, TIE-03): teksti `(c) Open Food Facts contributors` ja linkki käyttöehtoihin jokaisessa näkymässä, jossa näkyy OFF:n tietoja, myös Tänään-näkymän ja historian kirjauslistan alla, kun päivän kirjauksissa on OFF-tuotteesta tehty kirjaus. Sama maininta Tietolähteet-näkymään sekä vaiheessa 7 Google Playn kauppasivulle ja READMEen.
 - **1.4 / 8.11.2026:** OFF:n nopeusrajojen käsittely tarkennettu kohdassa 5.1 ennen vaihetta 4: välimuisti ennen verkkoa viivakoodihaussa, kameran toistuvien lukemien suodatus, sovelluksen oma pyyntörajoitin sekä HTTP 429- ja 503-vastausten käsittely ilman automaattisia uusintayrityksiä.
 
 - **1.3 / 1.11.2026:** Tulevaisuuden ideat koottu dokumenttiin `docs/ideat.md`. Sinne siirrettiin suljettujen riippuvuuksien avoimet vaihtoehdot, ja lisättiin iOS-version selvitettävät asiat, OFF:n SDK ja kielituki.
