@@ -158,6 +158,10 @@ Puhtaina funktioina `src/domain/`-hakemistossa, kattavasti yksikkötestattuina:
 - Nimihaku: OFF:n hakurajapinta, suodatus maahan Suomi ensisijaisesti. Hakurajapinnan raja on 10 hakua/min IP-osoitetta kohden, eikä OFF salli sen käyttöä näppäilyn mukana päivittyvään hakuun (tarkistettu 18.10.2026, docs/adr/0004). Siksi omat ja Fineli-tulokset näytetään heti paikallisesti, ja OFF-haku lähetetään vasta käyttäjän erillisellä toiminnolla (esim. ”Hae myös Open Food Factsista”) tai pitkän viiveen jälkeen vähintään 3 merkillä. Vaiheessa 4 nimihaku tehdään hakupisteellä `/cgi/search.pl` osoitteessa `https://world.openfoodfacts.net`, koska v2-palvelinrajapinnassa ei ole tekstihakua. Search-a-licious (`search.openfoodfacts.org`, `search.openfoodfacts.net`) on eri osoitteessa, joten sen käyttöönotto vaatii kehittäjän nimenomaisen päätöksen.
 - Jokainen pyyntö lähettää `User-Agent`-otsakkeen muodossa `Kevytpaasto/<versio> (<yhteystieto>)` OFF:n ohjeiden mukaisesti. Hakutulosten yhteydessä ja Tietolähteet-näkymässä mainitaan Open Food Facts ja lisenssi (ODbL) linkkeineen.
 - Haetut tuotteet tallennetaan `food`-tauluun välimuistiksi, jolloin ne toimivat jatkossa ilman verkkoa (LAA-04).
+- Välimuisti ennen verkkoa: viivakoodihaku etsii tuotetta ensin `food`-taulusta. Jos tuote löytyy ja sen `fetched_at` on riittävän tuore, OFF:ltä ei kysytä uudelleen. Vanhentunut tuote näytetään heti välimuistista, ja tieto päivitetään taustalla, jos verkkoa on. Tuoreusraja päätetään vaiheessa 4.
+- Kameran toistuvat lukemat: kamera voi lukea saman viivakoodin monta kertaa sekunnissa. Sama koodi lähettää pyynnön vain kerran, ja lukeminen keskeytetään, kunnes tulos on näytetty tai käyttäjä palaa lukunäkymään.
+- Sovelluksen oma rajoitin: OFF-asiakas (`services/off/`) laskee OFF-pyynnöt liukuvassa minuutin ikkunassa erikseen tuote- ja hakupyynnöille ja jättää pelivaraa OFF:n rajoihin (esim. 12 tuotehakua ja 8 hakua minuutissa). Kun raja täyttyy, uutta pyyntöä ei lähetetä. Hakupainike on silloin hetken pois käytöstä, ja syy kerrotaan tekstinä. Uusi nimihaku peruu edellisen keskeneräisen pyynnön (`AbortController`). Rajoittimen laskenta on puhdas funktio aikaleimoista `src/domain/`-kerroksessa, ja se yksikkötestataan.
+- Rajan ylitys ja palvelun ruuhka: kun OFF vastaa HTTP 429 tai 503 tai yhteys ei onnistu, automaattisia uusintayrityksiä ei tehdä. Paikalliset tulokset pysyvät näkyvissä, ja käyttäjälle näytetään neutraali viesti, esimerkiksi ”Open Food Facts -haku ei juuri nyt onnistu. Yritä hetken kuluttua uudelleen.” (LAA-08). Jos vastauksessa on `Retry-After`-otsake, rajoitin pitää OFF-pyynnöt tauolla ilmoitetun ajan.
 - Hakutuloksessa näytetään nimi, merkki, energia perusteineen ja lähde (HAK-03). Puuttuva energia merkitään selvästi (HAK-04).
 
 ### 5.2 Fineli
@@ -273,7 +277,7 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 | Riski / kysymys | Vaikutus | Toimenpide |
 | --- | --- | --- |
 | OFF:n kirjoitusrajapinnan ehdot sovellustunnuksella tehtäville muokkauksille | Vaihe 6 voi muuttua | Ohjeet tarkistettu (docs/adr/0004): globaali sovellustili ja `app_*`-parametrit ovat sallittuja. Testiympäristökokeilu on tekemättä. |
-| OFF-haun nopeusrajat (15 tuotehakua ja 10 hakua/min/IP) | Haku tuntuu hitaalta tai estyy | Paikalliset tulokset ensin, OFF-haku erillisellä toiminnolla, välimuisti; Search-a-licious vain kehittäjän nimenomaisella päätöksellä; tarvittaessa välityspalvelun välimuisti |
+| OFF-haun nopeusrajat (15 tuotehakua ja 10 hakua/min/IP) | Haku tuntuu hitaalta tai estyy | Paikalliset tulokset ensin, OFF-haku erillisellä toiminnolla, välimuisti ennen verkkoa, sovelluksen oma pyyntörajoitin, ei automaattisia uusintayrityksiä (kohta 5.1); Search-a-licious vain kehittäjän nimenomaisella päätöksellä; tarvittaessa välityspalvelun välimuisti |
 | Suomalaisten tuotteiden kattavuus OFF:ssa | Käyttäjä joutuu lisäämään tuotteita usein | OFF-julkaisu on juuri tätä varten; pikakirjaus toimii aina |
 | OFF:n testiympäristön tiedot poikkeavat tuotannosta | Haku voi ennen julkaisua löytää eri tuotteet ja tiedot kuin tuotanto | Automaattitestit käyttävät mockattua OFF:ia; tuotannon haku tarkistetaan julkaisukäännöksellä, kun kehittäjä on päättänyt siirtymisestä (docs/adr/0011) |
 | Finelin aineiston rakenne ja lisenssimaininta | Vaihe 3 | Rakenne ja lisenssi selvitetty (docs/adr/0003). fineli.fi estää automaattiset lataukset, joten aineisto ladataan käsin. |
@@ -289,6 +293,8 @@ Vaiheen 1 jälkeen sovellus on jo omassa käytössä paastopäivinä.
 Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muistioina hakemistoon `docs/adr/` (`NNNN-otsikko.md`: tausta, päätös, seuraukset). Tämän suunnitelman päätökset toimivat lähtötilanteena; muistio kirjoitetaan, kun päätös muuttuu tai vaiheen 0 kokeilu tuottaa uutta tietoa.
 
 ## 14. Muutoshistoria
+
+- **1.4 / 8.11.2026:** OFF:n nopeusrajojen käsittely tarkennettu kohdassa 5.1 ennen vaihetta 4: välimuisti ennen verkkoa viivakoodihaussa, kameran toistuvien lukemien suodatus, sovelluksen oma pyyntörajoitin sekä HTTP 429- ja 503-vastausten käsittely ilman automaattisia uusintayrityksiä.
 
 - **1.3 / 1.11.2026:** Tulevaisuuden ideat koottu dokumenttiin `docs/ideat.md`. Sinne siirrettiin suljettujen riippuvuuksien avoimet vaihtoehdot, ja lisättiin iOS-version selvitettävät asiat, OFF:n SDK ja kielituki.
 - **1.2 / 1.11.2026:** Kaikki OFF-kutsut, myös haut ja kriteerin 5 varmennus, tehdään osoitteeseen `https://world.openfoodfacts.net`, joka on myös konfiguraation oletus. Muutos muuhun OFF-palvelun osoitteeseen vaatii kehittäjän nimenomaisen päätöksen; tämä koskee myös Search-a-liciousta ja vaiheen 7 tuotantoon siirtymistä. Kehityksessä saa käyttää myös paikallista kopiota OFF:n datasta (päätösmuistio 0011).
