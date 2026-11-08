@@ -23,6 +23,10 @@ Sovellus avautuu puhelimen Expo Go -sovelluksessa (SDK 58) tai development build
 
 Sovellus ei ole THL:n eikä Open Food Factsin tuottama tai suosittelema palvelu.
 
+## Osallistuminen
+
+Virheilmoitukset ja ideat ovat tervetulleita GitHubin issueina. Pull requesteja ei toistaiseksi oteta vastaan, ks. [CONTRIBUTING.md](CONTRIBUTING.md). Haavoittuvuuksista ilmoitetaan yksityisesti, ks. [SECURITY.md](SECURITY.md).
+
 ## Lisenssi
 
 GPL-3.0-or-later, ks. [LICENSE](LICENSE). Tietolähteiden aineistoihin sovelletaan niiden omia lisenssejä.

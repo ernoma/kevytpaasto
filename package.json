@@ -20,7 +20,8 @@
     "test": "npm test --workspaces --if-present",
     "emulator": "node scripts/android/emulator.ts",
     "e2e": "node scripts/android/e2e.ts",
-    "device": "node scripts/android/device.ts"
+    "device": "node scripts/android/device.ts",
+    "secrets": "node scripts/git/secrets.ts"
   },
   "devDependencies": {
     "eslint": "^9.39.0",

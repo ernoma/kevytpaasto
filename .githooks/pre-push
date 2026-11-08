@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stops the push if gitleaks finds possible secrets in the pushed commits (AVO-03, docs/adr/0014).
+# Enable once per clone: git config core.hooksPath .githooks
+exec node scripts/git/secrets.ts pre-push

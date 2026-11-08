@@ -1,7 +1,7 @@
 # 0006 – Avoin lähdekoodi, ei ansaintaa
 
 Päiväys: 25.10.2026  
-Tila: hyväksytty  
+Tila: hyväksytty; täsmennetty muistiolla [0014](0014-repo-julkiseksi-ennen-vaihetta-4.md) (avaamisen ajankohta ja välityspalvelun lisenssi)  
 Liittyy: ANS-01, ANS-02, AVO-01…AVO-04, kriteeri 13  
 Korvaa: toteutussuunnitelman 0.3 luvun 10 (ansaintavalmius, `entitlements`)
 

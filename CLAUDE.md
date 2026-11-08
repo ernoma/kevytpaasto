@@ -34,6 +34,7 @@ Juuressa:
 - `npm run emulator` – käynnistää Android-emulaattorin ja odottaa käynnistymistä (ks. `docs/adr/0007-emulaattoritestaus.md`)
 - `npm run e2e [-- <flow>]` – Maestro-testit (`app/e2e/`) emulaattorissa; Metron on oltava käynnissä
 - `npm run device -- screenshot [nimi]` – kuvakaappaus tiedostoon `app/e2e/output/`; myös `font <koko|reset>`, `offline`, `online` ja `open`
+- `npm run secrets` – gitleaks koko Git-historiaan; pre-push-koukku ajaa saman tarkistuksen pushattaville commiteille (ks. `docs/adr/0014-repo-julkiseksi-ennen-vaihetta-4.md`)
 
 Hakemistossa `app/`:
 
@@ -72,7 +73,8 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 
 ## Avoin lähdekoodi
 
-- Projekti on avointa lähdekoodia, lisenssi GPL-3.0-or-later (`docs/adr/0006-avoin-lahdekoodi.md`). Repo on tarkoitus avata julkiseksi: älä tallenna siihen tunnuksia, avaimia tai henkilökohtaisia yhteystietoja (AVO-03).
+- Projekti on avointa lähdekoodia, lisenssi GPL-3.0-or-later (`docs/adr/0006-avoin-lahdekoodi.md`). Repo avataan julkiseksi jo ennen vaihetta 4 (`docs/adr/0014-repo-julkiseksi-ennen-vaihetta-4.md`), joten kaikki pushattu on julkista: älä tallenna siihen tunnuksia, avaimia tai henkilökohtaisia yhteystietoja (AVO-03).
+- Ulkopuolisia pull requesteja ei toistaiseksi oteta vastaan; virheilmoitukset ja ideat tulevat issueina (`CONTRIBUTING.md`). Haavoittuvuusilmoitukset käsitellään yksityisesti (`SECURITY.md`).
 - Ei maksullisia ominaisuuksia, ostopolkuja, mainontaa eikä analytiikkaa tai muuta laitteelta tietoja lähettävää seurantaa (ANS-01, ANS-02, AVO-02).
 - Uuden riippuvuuden lisenssin on oltava GPL-3.0:n kanssa yhteensopiva. Suosi avointa vaihtoehtoa, kun se on riittävän hyvä (AVO-04).
 
@@ -90,7 +92,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 - Commitit tehdään suoraan `main`-haaraan, ei erillisiin haaroihin.
 - Commitit tehdään kysymättä erikseen lupaa, kun työ on valmis: `npm run check` menee läpi, ja käyttöliittymämuutokset on todennettu emulaattorissa. Keskeneräistä työtä ei commitoida.
 - Yksi commit kattaa yhden kokonaisuuden. Commitiin otetaan vain tehtävän tiedostot nimeltä, ei `git add .`. Jos työhakemistossa on muita muutoksia, niistä kerrotaan kehittäjälle.
-- Valmis commit pushataan `main`-haaraan kysymättä, kun repo on yksityinen. Ennen pushausta tarkistetaan, ettei muutoksissa ole tunnuksia, avaimia tai henkilökohtaisia yhteystietoja. Kun repo avataan julkiseksi, tämä sääntö arvioidaan uudelleen, ja siihen asti pushaus vaatii luvan.
+- Valmis commit pushataan `main`-haaraan kysymättä, myös kun repo on julkinen (päätösmuistio 0014). Ennen pushausta tarkistetaan, ettei muutoksissa ole tunnuksia, avaimia tai henkilökohtaisia yhteystietoja. Pre-push-koukku `.githooks/pre-push` ajaa gitleaksin pushattaville commiteille; koukku otetaan käyttöön kerran kloonia kohden komennolla `git config core.hooksPath .githooks`. Jos koukku pysäyttää pushauksen, kerro löydöksestä kehittäjälle: koukkua ei ohiteta (`--no-verify`), eikä löydöstä merkitä sallituksi ilman lupaa. Jos tunnus on jo pushattu, kerro heti, että tunnus on mitätöitävä ja vaihdettava; historian siivous ei riitä.
 - Force push vaatii aina kehittäjän erillisen luvan, eikä historiaa muuteta ilman lupaa (`amend`, `rebase`, `reset`). Pushauslupa ei koske tuotantoon vaikuttavia toimia, kuten välityspalvelun deployta.
 - Hyväksymiskriteereistä tehdään testit aina kun mahdollista. Päivitä `docs/hyvaksymistestaus.md`, kun kriteeri todennetaan.
 - Työ on valmis, kun `npm run check` menee läpi. Jos muutos koskee käyttöliittymää, todenna se myös itse emulaattorissa: käynnistä emulaattori ja Metro taustalle (`npm run emulator`, `npx expo start` hakemistossa `app/`), aja `npm run e2e`, katso kuvakaappaukset ja tarkista tekstin suurennus (`font 1.3` ja `font 2.0`) sekä lentotila (`offline`). Kehittäjää ei pyydetä kokeilemaan sitä, minkä voit todentaa emulaattorissa.
