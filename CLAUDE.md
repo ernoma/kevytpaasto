@@ -9,6 +9,7 @@
 - Päätösmuistiot: `docs/adr/`
 - Tulevaisuuden ideat: `docs/ideat.md`
 - Hyväksymistestauksen seuranta: `docs/hyvaksymistestaus.md`
+- Kehitysympäristö ja siirto toiselle koneelle: `docs/kehitysymparisto.md`
 
 Lue toteutussuunnitelman asiaankuuluva osa ennen työn aloittamista. Jos tehtävä on ristiriidassa suunnitelman kanssa, kerro siitä ennen toteutusta äläkä muuta arkkitehtuuria hiljaa.
 
@@ -92,6 +93,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 - Commitit tehdään suoraan `main`-haaraan, ei erillisiin haaroihin.
 - Commitit tehdään kysymättä erikseen lupaa, kun työ on valmis: `npm run check` menee läpi, ja käyttöliittymämuutokset on todennettu emulaattorissa. Keskeneräistä työtä ei commitoida.
 - Yksi commit kattaa yhden kokonaisuuden. Commitiin otetaan vain tehtävän tiedostot nimeltä, ei `git add .`. Jos työhakemistossa on muita muutoksia, niistä kerrotaan kehittäjälle.
+- Ennen committia tarkistetaan, että `git config user.email` on GitHubin noreply-osoite (`…@users.noreply.github.com`). Repo on julkinen, ja globaali Git-asetus voi olla henkilökohtainen osoite (AVO-03). Jos osoite on muu, ei commitoida, vaan asiasta kerrotaan kehittäjälle.
 - Valmis commit pushataan `main`-haaraan kysymättä, myös kun repo on julkinen (päätösmuistio 0014). Ennen pushausta tarkistetaan, ettei muutoksissa ole tunnuksia, avaimia tai henkilökohtaisia yhteystietoja. Pre-push-koukku `.githooks/pre-push` ajaa gitleaksin pushattaville commiteille; koukku otetaan käyttöön kerran kloonia kohden komennolla `git config core.hooksPath .githooks`. Jos koukku pysäyttää pushauksen, kerro löydöksestä kehittäjälle: koukkua ei ohiteta (`--no-verify`), eikä löydöstä merkitä sallituksi ilman lupaa. Jos tunnus on jo pushattu, kerro heti, että tunnus on mitätöitävä ja vaihdettava; historian siivous ei riitä.
 - Force push vaatii aina kehittäjän erillisen luvan, eikä historiaa muuteta ilman lupaa (`amend`, `rebase`, `reset`). Pushauslupa ei koske tuotantoon vaikuttavia toimia, kuten välityspalvelun deployta.
 - Hyväksymiskriteereistä tehdään testit aina kun mahdollista. Päivitä `docs/hyvaksymistestaus.md`, kun kriteeri todennetaan.
