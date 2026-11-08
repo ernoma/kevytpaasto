@@ -26,7 +26,7 @@ Tarkistus tehtiin pelkillä lukupyynnöillä ennen tämän päätöksen kirjaami
 - **Konfiguraatio.** Sovelluksen ja välityspalvelun OFF-osoitteet tulevat konfiguraatiosta, jonka oletus on `https://world.openfoodfacts.net`. Testi varmistaa oletuksen ja sen, ettei koodissa ole muita OFF-kutsujen osoitteita.
 - **HTTP Basic.** Pyynnöissä lähetetään aina otsake `off`/`off`, koska ohje vaatii sen. Arvo on julkinen eikä salaisuus (AVO-03).
 - **Nimihaku.** Vaiheessa 4 nimihaku tehdään hakupisteellä `/cgi/search.pl`.
-- **Tuotantoon siirtyminen.** Se kuuluu vaiheeseen 7, mutta alkaa vasta kehittäjän päätöksestä: täytetään API-käytön ilmoituslomake, asetetaan tuotanto-osoite julkaisukäännökseen ja välityspalveluun ja tarkistetaan haku julkaisukäännöksellä. Tuotantoon ei kirjoiteta testituotteita (kriteeri 5).
+- **Tuotantoon siirtyminen.** Se kuuluu vaiheeseen 7, mutta alkaa vasta kehittäjän päätöksestä: asetetaan tuotanto-osoite julkaisukäännökseen ja välityspalveluun ja tarkistetaan haku julkaisukäännöksellä. Tuotantoon ei kirjoiteta testituotteita (kriteeri 5). API-käytön ilmoituslomake täytetään jo ennen vaihetta 4 (muutettu 8.11.2026, päätösmuistio 0013).
 
 ## Seuraukset
 
