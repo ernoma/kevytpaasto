@@ -73,7 +73,7 @@ Reitit ovat hakemistossa `app/src/app/` (Expo Router, ks. `docs/adr/0001-projekt
 
 ## Avoin lähdekoodi
 
-- Projekti on avointa lähdekoodia, lisenssi GPL-3.0-or-later (`docs/adr/0006-avoin-lahdekoodi.md`). Repo avataan julkiseksi jo ennen vaihetta 4 (`docs/adr/0014-repo-julkiseksi-ennen-vaihetta-4.md`), joten kaikki pushattu on julkista: älä tallenna siihen tunnuksia, avaimia tai henkilökohtaisia yhteystietoja (AVO-03).
+- Projekti on avointa lähdekoodia, lisenssi GPL-3.0-or-later (`docs/adr/0006-avoin-lahdekoodi.md`). Repo on julkinen (avattu 8.11.2026, `docs/adr/0014-repo-julkiseksi-ennen-vaihetta-4.md`), joten kaikki pushattu on heti julkista: älä tallenna siihen tunnuksia, avaimia tai henkilökohtaisia yhteystietoja (AVO-03).
 - Ulkopuolisia pull requesteja ei toistaiseksi oteta vastaan; virheilmoitukset ja ideat tulevat issueina (`CONTRIBUTING.md`). Haavoittuvuusilmoitukset käsitellään yksityisesti (`SECURITY.md`).
 - Ei maksullisia ominaisuuksia, ostopolkuja, mainontaa eikä analytiikkaa tai muuta laitteelta tietoja lähettävää seurantaa (ANS-01, ANS-02, AVO-02).
 - Uuden riippuvuuden lisenssin on oltava GPL-3.0:n kanssa yhteensopiva. Suosi avointa vaihtoehtoa, kun se on riittävän hyvä (AVO-04).

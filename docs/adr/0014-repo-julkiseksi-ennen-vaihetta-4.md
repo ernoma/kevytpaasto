@@ -38,3 +38,7 @@ Esteitä ei löytynyt, ja avaaminen on nyt helpompaa kuin vaiheessa 7:
 - `CONTRIBUTING.md` sisältää lyhyen käytösohjeen. Laajempi käytösohje (esim. Contributor Covenant) otetaan käyttöön, kun pull requesteja aletaan ottaa vastaan.
 - Kriteerin 13 salaisuusskannaus on tehty ([hyvaksymistestaus.md](../hyvaksymistestaus.md)). Riippuvuuksien katselmointi ja puhdas käännös README:n mukaan tehdään vaiheessa 7.
 - Google Play sitoo sovellustunnuksen `fi.kevytpaasto.app` kehittäjätiliin vasta ensimmäisestä ladatusta versiosta, joten joku muu voisi teoriassa ladata julkisesta koodista käännetyn version ensin. Riski on pieni, ja tunnuksen voi varata lataamalla version sisäiseen testaukseen.
+
+## Toteutus
+
+Repo avattiin julkiseksi 8.11.2026. Samalla GitHubissa kytkettiin päälle salaisuuksien skannaus, push protection ja yksityinen haavoittuvuusilmoitus, ja repolle lisättiin kuvaus. Tilin sähköpostiasetukset kehittäjä kytkee itse.
