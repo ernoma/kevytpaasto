@@ -1,7 +1,7 @@
 # 5:2-paastosovellus – vaatimusmäärittely
 
-Versio: 0.3  
-Päiväys: 25.10.2026  
+Versio: 0.4  
+Päiväys: 8.11.2026  
 Tila: keskustelun pohjalta laadittu luonnos
 
 ## 1. Tarkoitus
@@ -182,7 +182,7 @@ Versiossa 0.2 olleet ansaintaa koskevat vaatimukset ANS-03–ANS-10 on poistettu
 
 - **TIE-01 (P1):** Henkilökohtainen päiväkirja ja julkinen tuotetieto erotetaan toisistaan. Käyttäjälle kerrotaan ymmärrettävästi, mitä tietoja ulkoisiin palveluihin välitetään.
 - **TIE-02 (P1):** Henkilökohtaista päiväkirjaa ei julkaista eikä käytetä muihin tarkoituksiin ilman erillistä perustetta ja käyttäjälle annettavaa tietoa. Pilvisynkronointi ei ole ensimmäisen version edellytys.
-- **TIE-03 (P1):** Tietolähteiden nimet, alkuperät ja vaaditut lisenssimaininnat säilyvät ja ovat käyttäjän saatavilla. Ulkopuolista sovellusta ei esitetä lähdeorganisaatioiden omana tai suosittelemana palveluna.
+- **TIE-03 (P1):** Tietolähteiden nimet, alkuperät ja vaaditut lisenssimaininnat säilyvät ja ovat käyttäjän saatavilla. Ulkopuolista sovellusta ei esitetä lähdeorganisaatioiden omana tai suosittelemana palveluna. Tietolähteen nimi kirjoitetaan käyttäjälle aina kokonaan, esimerkiksi ”Open Food Facts”, ei lyhenteenä. Tässä määrittelyssä lyhenne OFF tarkoittaa Open Food Factsia.
 - **TIE-04 (P1):** Toteutusta varten tarkistetaan lähteiden ajantasaiset käyttöehdot, julkaisuehdot ja käyttörajoitukset. Eri lähteiden tietoja ei käsitellä automaattisesti samoin oikeuksin julkaistavana yhtenä tietokantana.
 - **TIE-05 (P1):** Sovellus ei esitä käyttäjän itse asettamaa kalorirajaa yksilöllisenä terveyssuosituksena.
 
@@ -231,6 +231,7 @@ Linkit ovat toteutussuunnittelun lähtökohtia. Tämä vaatimusmäärittely ei v
 
 ## 12. Muutoshistoria
 
+- **0.4 / 8.11.2026:** TIE-03 tarkennettu: tietolähteen nimi näytetään käyttäjälle aina kokonaan (”Open Food Facts”), ei lyhenteenä. Lyhenne OFF on vain dokumentaation ja kehityksen käytössä.
 - **0.3 / 25.10.2026:** Luovuttu ansainnasta: sovellus on kokonaan maksuton avoimen lähdekoodin projekti. Poistettu ANS-03–ANS-10, lisätty AVO-01–AVO-04 ja muutettu hyväksymiskriteeri 13.
 - **0.2 / 18.10.2026:** Lisätty maksuton peruskäyttö ja mahdollisuus myöhempiin maksullisiin lisäominaisuuksiin tai muihin tulonlähteisiin. Tarkennettu rajausta ja hyväksymiskriteerejä. Ansaintamallia, hinnoittelua tai maksullisten ominaisuuksien sisältöä ei ole valittu.
 - **0.1 / 18.10.2026:** Ensimmäinen keskustelun pohjalta laadittu luonnos.

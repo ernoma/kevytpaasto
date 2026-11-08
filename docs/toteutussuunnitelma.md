@@ -225,6 +225,7 @@ Suomenkielinen, puhelimelle suunniteltu. Tekstit kootaan yhteen tiedostoon (`src
 - Suosikin oletusannos lisätään yhdellä napautuksella Tänään-näkymän pikanapista; kumoaminen tarjotaan lyhytaikaisella ilmoituksella (LAA-02).
 - Ylitys esitetään luvulla ja tekstillä (”Ylitys 45 kcal”), ei pelkällä värillä eikä moittivalla sävyllä (PAI-03, LAA-06, LAA-08).
 - Kaikilla toiminnoilla on saavutettavuusnimet, ja asettelu kestää järjestelmän tekstikoon suurennuksen (LAA-06).
+- Tietolähteen nimi kirjoitetaan käyttäjälle aina kokonaan: ”Open Food Facts”, ei lyhennettä OFF (TIE-03). Sääntö koskee kaikkia `strings.fi.ts`-tekstejä, myös saavutettavuusnimiä, virheilmoituksia, julkaisun tiloja ja Tietolähteet-näkymää. Yksikkötesti varmistaa, ettei `strings.fi.ts` sisällä erillistä sanaa ”OFF”. Lyhennettä käytetään vain koodissa, dokumentaatiossa, vaatimustunnuksissa (esim. OFF-03) ja kehityskeskustelussa.
 - Kameralupa pyydetään vasta, kun viivakoodinlukija avataan (KAY-04).
 - Tallennuspainike lukitaan tallennuksen ajaksi, ja kirjauksen UUID luodaan lomakkeen avautuessa, jotta kaksoisnapautus ei luo kahta riviä (KIR-07).
 
@@ -296,6 +297,7 @@ Merkittävät tekniset päätökset ja niiden muutokset kirjataan lyhyinä muist
 
 ## 14. Muutoshistoria
 
+- **1.7 / 8.11.2026:** Käyttäjälle näkyvissä teksteissä tietolähteen nimi on aina ”Open Food Facts”, ei lyhenne OFF; yksikkötesti valvoo `strings.fi.ts`-tiedostoa (kohta 7.2, TIE-03). Lyhenne säilyy koodissa, dokumentaatiossa ja kehityskeskustelussa.
 - **1.6 / 8.11.2026:** Kirjauksen OFF-alkuperä tallennetaan tilannekuvana `log_entry.includes_off_data`-sarakkeeseen vaiheen 4 migraatiolla, eikä sitä päätellä lukuhetkellä lähderuoasta tai ateriasta. Näin Tänään-näkymän lähdemaininta pysyy oikeana, vaikka ateriaa muokattaisiin (päätösmuistio 0012).
 - **1.5 / 8.11.2026:** OFF:n lähdemaininta OFF:n suosituksen mukaiseksi (kohta 5.1, TIE-03): teksti `(c) Open Food Facts contributors` ja linkki käyttöehtoihin jokaisessa näkymässä, jossa näkyy OFF:n tietoja, myös Tänään-näkymän ja historian kirjauslistan alla, kun päivän kirjauksissa on OFF-tuotteesta tehty kirjaus. Sama maininta Tietolähteet-näkymään sekä vaiheessa 7 Google Playn kauppasivulle ja READMEen.
 - **1.4 / 8.11.2026:** OFF:n nopeusrajojen käsittely tarkennettu kohdassa 5.1 ennen vaihetta 4: välimuisti ennen verkkoa viivakoodihaussa, kameran toistuvien lukemien suodatus, sovelluksen oma pyyntörajoitin sekä HTTP 429- ja 503-vastausten käsittely ilman automaattisia uusintayrityksiä.
